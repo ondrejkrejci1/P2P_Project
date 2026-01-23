@@ -6,7 +6,81 @@
         xmlns:local="clr-namespace:P2P_Project"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
+
+    <Window.Resources>
+        <Style x:Key="RoundButtonStyle" TargetType="Button">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" 
+                            CornerRadius="7">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+
+    <!--Style="{StaticResource RoundButtonStyle}"-->
+    
+    
     <Grid>
-        <StackPanel x:Name="Errors"/>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="70"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="Node KO-YZX" Height="80" FontWeight="ExtraBold" FontSize="42" Background="#232528" Foreground="FloralWhite" Padding="15, 6"  />
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Row="1"  Margin="15">
+                <TextBlock Text="Logs" FontWeight="Bold" Foreground="#232528" FontSize="28" HorizontalAlignment="Left"/>
+
+                <ScrollViewer Height="300" Width="370" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Left" VerticalAlignment="Top"  Background="#F7F7FF">
+
+                    <StackPanel x:Name="LoggerPanel"/>
+
+                </ScrollViewer>
+
+            </StackPanel>
+
+            <Grid Grid.Column="1" Margin="0">
+
+                <Grid.RowDefinitions >
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Text="Clients" FontWeight="Bold" Foreground="#232528" FontSize="28" HorizontalAlignment="Left" VerticalAlignment="Top" Height="40" Margin="10,15,0,0"/>
+
+                <TextBlock Text="--" FontSize ="28" Margin="10,50,0,0" VerticalAlignment="Top" Padding="0,20,0,0" HorizontalAlignment="Left" TextAlignment="Center" Height="90" Width="90"/>
+
+                <ScrollViewer Height="150" Width="240" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="130,20,15,0" Background="#F7F7FF">
+
+                    <StackPanel x:Name="ClientsPanel"/>
+
+                </ScrollViewer>
+
+                <StackPanel Grid.Row="1"  Margin="10,0,15,15">
+                    <TextBlock Text="Errors" FontWeight="Bold" Foreground="#232528" FontSize="28" HorizontalAlignment="Left"/>
+
+                    <ScrollViewer Height="130" Width="370" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Left" VerticalAlignment="Top"  Background="#F7F7FF">
+                        
+                        <StackPanel x:Name="ErrorPanel"/>
+
+                    </ScrollViewer>
+
+                </StackPanel>
+
+            </Grid>
+        </Grid>
+
     </Grid>
 </Window>

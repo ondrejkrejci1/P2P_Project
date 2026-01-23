@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Net.Sockets;
+using System.Windows;
 using System.Windows.Controls;
 
 namespace P2P_Project.Presentation_layer
@@ -26,8 +27,14 @@ namespace P2P_Project.Presentation_layer
             this._timeoutTime = _timeoutTime;
 
             _errorPanel = errorPanel;
+            _clientAcceptor = new Thread(AcceptClient);
+        }
 
-
+        public void Start()
+        {
+            _listener.Start();
+            _isRunning = true;
+            _clientAcceptor.Start();
         }
 
 
@@ -55,27 +62,29 @@ namespace P2P_Project.Presentation_layer
         }
 
 
-        private static string GetLocalIPAddress()
+        private string GetLocalIPAddress()
         {
             var host = Dns.GetHostEntry(Dns.GetHostName());
             var ipAddress = host.AddressList
-                .FirstOrDefault(ip => ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork);
+                .FirstOrDefault(ip => ip.AddressFamily == AddressFamily.InterNetwork);
 
             if (ipAddress == null)
-                throw new Exception("No IPv4 address found for this machine.");
+                ErrorLog("Unknown IP Address", "Automatic ip setting couldnt find IP address of this device");
 
             return ipAddress.ToString();
         }
 
         private void ErrorLog(string erronName, string errorMessage)
         {
-            TextBlock errorText = new TextBlock
+            Application.Current.Dispatcher.Invoke(() =>
             {
-                Text = $"{erronName} error (Client Listener): {errorMessage}",
-                Foreground = System.Windows.Media.Brushes.Red,
-                Margin = new System.Windows.Thickness(5)
-            };
-            _errorPanel.Children.Add(errorText);
+                TextBlock errorText = new TextBlock
+                {
+                    Text = $"{erronName} error (Client Listener): {errorMessage}",
+                    Foreground = System.Windows.Media.Brushes.Red
+                };
+                _errorPanel.Children.Add(errorText);
+            });
         }
 
     }

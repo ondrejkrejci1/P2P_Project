@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Net.Sockets;
+using System.Windows;
 using System.Windows.Controls;
 
 namespace P2P_Project.Presentation_layer
@@ -21,6 +22,7 @@ namespace P2P_Project.Presentation_layer
         {
             _commandParser = new CommandParser();
             _client = client;
+            _errorPanel = errorPanel;
             _reader = new StreamReader(_client.GetStream());
             _writer = new StreamWriter(_client.GetStream()) { AutoFlush = true };
         }
@@ -38,13 +40,7 @@ namespace P2P_Project.Presentation_layer
             }
             catch (Exception ex)
             {
-                TextBlock errorText = new TextBlock
-                {
-                    Text = $"Connection error: {ex.Message}",
-                    Foreground = System.Windows.Media.Brushes.Red,
-                    Margin = new System.Windows.Thickness(5)
-                };
-                _errorPanel.Children.Add(errorText);
+                ErrorLog("RunLoop", ex.Message);
             }
         }
 
@@ -56,18 +52,14 @@ namespace P2P_Project.Presentation_layer
 
                 string[] parsedCommand = _commandParser.Parse(clientInput);
 
+                throw new NotImplementedException("Nic zatim");
+
                 // odeslani na command executor - parsnuty komand a tcpclient
 
             }
             catch (Exception ex)
             {
-                TextBlock errorText = new TextBlock
-                {
-                    Text = $"Communication error (Connection Manager): {ex.Message}",
-                    Foreground = System.Windows.Media.Brushes.Red,
-                    Margin = new System.Windows.Thickness(5)
-                };
-                _errorPanel.Children.Add(errorText);
+                ErrorLog("Communication", ex.Message);
             }
 
         }
@@ -78,6 +70,20 @@ namespace P2P_Project.Presentation_layer
             _client.Close();
             _clientThread.Join();
         }
+
+        private void ErrorLog(string erronName, string errorMessage)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                TextBlock errorText = new TextBlock
+                {
+                    Text = $"{erronName} error (Client Listener): {errorMessage}",
+                    Foreground = System.Windows.Media.Brushes.Red
+                };
+                _errorPanel.Children.Add(errorText);
+            });
+        }
+
 
     }
 }
