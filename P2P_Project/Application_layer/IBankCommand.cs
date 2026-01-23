@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Net.Sockets;
 
 namespace P2P_Project.Application_layer
 {
     public interface IBankCommand
     {
-        void Execute(string placeHolderForConnectionReference, string[] args);
-    }
+        void Execute(TcpClient client, string[] args);
+    };
 }
