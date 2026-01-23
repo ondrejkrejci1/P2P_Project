@@ -1,39 +1,42 @@
 ﻿using System;
 
-public class BankAccount
+namespace P2P_Project.Data_access_layer
 {
-    private int _accountNumber;
-    private float _balance;
-
-    public BankAccount(int accountNumber, float balance)
+    public class BankAccount
     {
-        AccountNumber = accountNumber;
-        Balance = balance;
-    }
+        private int _accountNumber;
+        private float _balance;
 
-    public int AccountNumber
-    {
-        get => _accountNumber;
-        set
+        public BankAccount(int accountNumber, float balance)
         {
-            if (value < 10000 || value > 99999)
-            {
-                throw new ArgumentException("Account number must be between 10000 and 99999.");
-            }
-            _accountNumber = value;
+            AccountNumber = accountNumber;
+            Balance = balance;
         }
-    }
 
-    public float Balance
-    {
-        get => _balance;
-        set
+        public int AccountNumber
         {
-            if (value < 0)
+            get => _accountNumber;
+            set
             {
-                throw new ArgumentException("Balance cannot be negative.");
+                if (value < 10000 || value > 99999)
+                {
+                    throw new ArgumentException("Account number must be between 10000 and 99999.");
+                }
+                _accountNumber = value;
             }
-            _balance = value;
+        }
+
+        public float Balance
+        {
+            get => _balance;
+            set
+            {
+                if (value < 0)
+                {
+                    throw new ArgumentException("Balance cannot be negative.");
+                }
+                _balance = value;
+            }
         }
     }
 }

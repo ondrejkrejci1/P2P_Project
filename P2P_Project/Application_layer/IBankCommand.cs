@@ -1,6 +1,9 @@
 ﻿using System;
 
-public interface IBankCommand
+namespace P2P_Project.Application_layer
 {
-    void Execute(string placeHolderForConnectionReference, string[] args);
+    public interface IBankCommand
+    {
+        void Execute(string placeHolderForConnectionReference, string[] args);
+    }
 }

@@ -1,68 +1,71 @@
 ﻿using System;
 
-public class Commands
+namespace P2P_Project.Application_layer
 {
-    public class BankCode : IBankCommand
+    public class Commands
     {
-        public void Execute(string placeHolderForConnectionReference, string[] args)
+        public class BankCode : IBankCommand
         {
-            throw new NotImplementedException();
+            public void Execute(string placeHolderForConnectionReference, string[] args)
+            {
+                throw new NotImplementedException();
+            }
         }
-    }
 
-    public class AccountCreate : IBankCommand
-    {
-        public void Execute(string placeHolderForConnectionReference, string[] args)
+        public class AccountCreate : IBankCommand
         {
-            throw new NotImplementedException();
+            public void Execute(string placeHolderForConnectionReference, string[] args)
+            {
+                throw new NotImplementedException();
+            }
         }
-    }
 
-    public class AccountDeposit : IBankCommand
-    {
-        public void Execute(string placeHolderForConnectionReference, string[] args)
+        public class AccountDeposit : IBankCommand
         {
-            throw new NotImplementedException();
+            public void Execute(string placeHolderForConnectionReference, string[] args)
+            {
+                throw new NotImplementedException();
+            }
         }
-    }
 
-    public class AccountWithdrawal : IBankCommand
-    {
-        public void Execute(string placeHolderForConnectionReference, string[] args)
+        public class AccountWithdrawal : IBankCommand
         {
-            throw new NotImplementedException();
+            public void Execute(string placeHolderForConnectionReference, string[] args)
+            {
+                throw new NotImplementedException();
+            }
         }
-    }
 
-    public class AccountBalance : IBankCommand
-    {
-        public void Execute(string placeHolderForConnectionReference, string[] args)
+        public class AccountBalance : IBankCommand
         {
-            throw new NotImplementedException();
+            public void Execute(string placeHolderForConnectionReference, string[] args)
+            {
+                throw new NotImplementedException();
+            }
         }
-    }
 
-    public class AccountRemove : IBankCommand
-    {
-        public void Execute(string placeHolderForConnectionReference, string[] args)
+        public class AccountRemove : IBankCommand
         {
-            throw new NotImplementedException();
+            public void Execute(string placeHolderForConnectionReference, string[] args)
+            {
+                throw new NotImplementedException();
+            }
         }
-    }
 
-    public class BankTotalAmounth : IBankCommand
-    {
-        public void Execute(string placeHolderForConnectionReference, string[] args)
+        public class BankTotalAmounth : IBankCommand
         {
-            throw new NotImplementedException();
+            public void Execute(string placeHolderForConnectionReference, string[] args)
+            {
+                throw new NotImplementedException();
+            }
         }
-    }
 
-    public class BankClients : IBankCommand
-    {
-        public void Execute(string placeHolderForConnectionReference, string[] args)
+        public class BankClients : IBankCommand
         {
-            throw new NotImplementedException();
+            public void Execute(string placeHolderForConnectionReference, string[] args)
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }

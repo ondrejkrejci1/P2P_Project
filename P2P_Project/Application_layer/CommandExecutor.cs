@@ -1,17 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using static Commands;
 
-public class CommandExecutor
+namespace P2P_Project.Application_layer
 {
-    private Dictionary<string, IBankCommand> _commands = new()
+    public class CommandExecutor
     {
-        ["BC"] = new BankCode(),
-        ["AC"] = new AccountCreate(),
-        ["AD"] = new AccountDeposit(),
-        ["AW"] = new AccountWithdrawal(),
-        ["AB"] = new AccountBalance(),
-        ["AR"] = new AccountRemove(),
-        ["BA"] = new BankTotalAmounth(),
-        ["BN"] = new BankClients()
-    };
+        private Dictionary<string, IBankCommand> _commands = new()
+        {
+            ["BC"] = new BankCode(),
+            ["AC"] = new AccountCreate(),
+            ["AD"] = new AccountDeposit(),
+            ["AW"] = new AccountWithdrawal(),
+            ["AB"] = new AccountBalance(),
+            ["AR"] = new AccountRemove(),
+            ["BA"] = new BankTotalAmounth(),
+            ["BN"] = new BankClients()
+        };
+    }
 }

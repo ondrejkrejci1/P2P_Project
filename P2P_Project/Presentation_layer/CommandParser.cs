@@ -1,21 +1,24 @@
 ﻿using System;
 
-public class CommandParser
+namespace P2P_Project.Presentation_layer
 {
-    /// <summary>
-    /// Parses input by trimming spaces, then splitting by space character.
-    /// </summary>
-    /// <param name="input"></param>
-    /// <returns>An array of strings where the first element is the command and subsequent elements are arguments; returns null if input is empty.</returns>
-    public string[] Parse(string input)
+    public class CommandParser
     {
-        if (string.IsNullOrWhiteSpace(input)) return null;
+        /// <summary>
+        /// Parses input by trimming spaces, then splitting by space character.
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns>An array of strings where the first element is the command and subsequent elements are arguments; returns null if input is empty.</returns>
+        public string[] Parse(string input)
+        {
+            if (string.IsNullOrWhiteSpace(input)) return null;
 
-        string[] parsedCommand = input.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            string[] parsedCommand = input.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
-        parsedCommand[0] = parsedCommand[0].ToUpper();
+            parsedCommand[0] = parsedCommand[0].ToUpper();
 
-        return parsedCommand;
+            return parsedCommand;
+        }
+
     }
-
 }
