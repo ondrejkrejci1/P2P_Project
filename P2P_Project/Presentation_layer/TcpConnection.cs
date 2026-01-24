@@ -6,7 +6,7 @@ using System.Windows.Controls;
 
 namespace P2P_Project.Presentation_layer
 {
-    public class ConnectionManager
+    public class TcpConnection
     {
         private TcpClient _client;
         private Thread _clientThread;
@@ -21,7 +21,7 @@ namespace P2P_Project.Presentation_layer
         private CommandParser _commandParser;
         private CommandExecutor _commandExecutor;
 
-        public ConnectionManager(TcpClient client, StackPanel errorPanel, StackPanel clientPanel)
+        public TcpConnection(TcpClient client, StackPanel errorPanel, StackPanel clientPanel)
         {
             _commandParser = new CommandParser();
             _commandExecutor = new CommandExecutor();
