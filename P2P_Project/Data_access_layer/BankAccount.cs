@@ -38,5 +38,6 @@ namespace P2P_Project.Data_access_layer
                 _balance = value;
             }
         }
+
     }
 }
