@@ -16,11 +16,12 @@ namespace P2P_Project.Presentation_layer
         private StreamWriter _writer;
 
         private StackPanel _errorPanel;
+        private StackPanel _clientPanel;
 
         private CommandParser _commandParser;
         private CommandExecutor _commandExecutor;
 
-        public ConnectionManager(TcpClient client, StackPanel errorPanel)
+        public ConnectionManager(TcpClient client, StackPanel errorPanel, StackPanel clientPanel)
         {
             _commandParser = new CommandParser();
             _commandExecutor = new CommandExecutor();
@@ -29,6 +30,7 @@ namespace P2P_Project.Presentation_layer
             _reader = new StreamReader(_client.GetStream());
             _writer = new StreamWriter(_client.GetStream()) { AutoFlush = true };
             _isRunning = true;
+            _clientPanel = clientPanel;
         }
 
 

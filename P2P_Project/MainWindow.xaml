@@ -7,25 +7,8 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
 
-    <Window.Resources>
-        <Style x:Key="RoundButtonStyle" TargetType="Button">
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" 
-                            CornerRadius="7">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-    </Window.Resources>
 
 
-    <!--Style="{StaticResource RoundButtonStyle}"-->
-    
-    
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="70"/>
@@ -60,11 +43,13 @@
 
                 <TextBlock Text="Clients" FontWeight="Bold" Foreground="#232528" FontSize="28" HorizontalAlignment="Left" VerticalAlignment="Top" Height="40" Margin="10,15,0,0"/>
 
-                <TextBlock Text="--" FontSize ="28" Margin="10,50,0,0" VerticalAlignment="Top" Padding="0,20,0,0" HorizontalAlignment="Left" TextAlignment="Center" Height="90" Width="90"/>
+                <Border Margin="10,50,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="89" Height="94" CornerRadius="20" Background="#45AC1F">
+                    <TextBlock x:Name="ClientCounter" Text="0" FontSize="65" Foreground="White" FontWeight="Bold" TextAlignment="Center" />
+                </Border>
 
                 <ScrollViewer Height="150" Width="240" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="130,20,15,0" Background="#F7F7FF">
 
-                    <StackPanel x:Name="ClientsPanel"/>
+                    <StackPanel x:Name="ClientPanel"/>
 
                 </ScrollViewer>
 
@@ -72,7 +57,7 @@
                     <TextBlock Text="Errors" FontWeight="Bold" Foreground="#232528" FontSize="28" HorizontalAlignment="Left"/>
 
                     <ScrollViewer Height="130" Width="370" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Left" VerticalAlignment="Top"  Background="#F7F7FF">
-                        
+
                         <StackPanel x:Name="ErrorPanel"/>
 
                     </ScrollViewer>

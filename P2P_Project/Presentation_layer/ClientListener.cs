@@ -17,8 +17,9 @@ namespace P2P_Project.Presentation_layer
         private int _timeoutTime;
 
         private StackPanel _errorPanel;
+        private StackPanel _clientPanel;
 
-        public ClientListener(string ipAddress, int port, int _timeoutTime, StackPanel errorPanel)
+        public ClientListener(string ipAddress, int port, int _timeoutTime, StackPanel errorPanel, StackPanel clientPanel)
         {
             _listener = new TcpListener(IPAddress.Parse(ipAddress), port);
             _clients = new List<ConnectionManager>();
@@ -27,6 +28,7 @@ namespace P2P_Project.Presentation_layer
             this._timeoutTime = _timeoutTime;
 
             _errorPanel = errorPanel;
+            _clientPanel = clientPanel;
             _clientAcceptor = new Thread(AcceptClient);
         }
 
@@ -45,9 +47,11 @@ namespace P2P_Project.Presentation_layer
                 try
                 {
                     TcpClient client = _listener.AcceptTcpClient();
-                    ConnectionManager connectionManager = new ConnectionManager(client,_errorPanel);
+                    ConnectionManager connectionManager = new ConnectionManager(client,_errorPanel,_clientPanel);
                     _clients.Add(connectionManager);
                     connectionManager.Run();
+
+
                 }
                 catch (SocketException socketEx)
                 {
