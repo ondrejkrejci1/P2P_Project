@@ -23,7 +23,7 @@ namespace P2P_Project.Application_layer
 
         public void ExecuteCommand(TcpClient client, string[] parsedInput)
         {
-            Log.Debug($"Executing {parsedInput}");
+            Log.Debug($"Executing {string.Join(", ", parsedInput)}");
             if (parsedInput == null || parsedInput.Length == 0) return;
 
             try
@@ -35,9 +35,9 @@ namespace P2P_Project.Application_layer
                 Log.Debug($"Command not found");
                 SendMessage(client, $"ER command not found: {parsedInput[0]}");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                Log.Error($"Failed to execute command due to an uknown error");
+                Log.Error($"Failed to execute command: {ex.Message}");
                 SendMessage(client, $"ER Internal server error");
             }
         }

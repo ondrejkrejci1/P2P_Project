@@ -19,7 +19,7 @@ namespace P2P_Project.Presentation_layer
 
             parsedCommand[0] = parsedCommand[0].ToUpper();
 
-            Log.Debug($"Parsed input: {parsedCommand}");
+            Log.Debug($"Parsed input: [{string.Join(", ", parsedCommand)}]");
             return parsedCommand;
         }
 

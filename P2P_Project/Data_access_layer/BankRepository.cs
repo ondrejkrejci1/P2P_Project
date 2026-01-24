@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Serilog;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -65,6 +66,7 @@ namespace P2P_Project.Data_access_layer
                 }
                 catch (Exception ex)
                 {
+                    Log.Error($"Failed to load bank accounts: {ex.Message}");
                     throw new Exception($"Failed to load bank accounts: {ex.Message}");
                 }
             }
