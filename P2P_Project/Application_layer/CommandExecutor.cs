@@ -1,4 +1,7 @@
-﻿using static Commands;
+﻿using Serilog;
+using System.Net.Sockets;
+using System.Text;
+using static P2P_Project.Application_layer.Commands;
 
 namespace P2P_Project.Application_layer
 {
@@ -20,6 +23,7 @@ namespace P2P_Project.Application_layer
 
         public void ExecuteCommand(TcpClient client, string[] parsedInput)
         {
+            Log.Debug($"Executing {parsedInput}");
             if (parsedInput == null || parsedInput.Length == 0) return;
 
             try
@@ -28,16 +32,20 @@ namespace P2P_Project.Application_layer
             }
             catch (KeyNotFoundException)
             {
+                Log.Debug($"Command not found");
                 SendMessage(client, $"ER command not found: {parsedInput[0]}");
             }
             catch (Exception)
             {
+                Log.Error($"Failed to execute command due to an uknown error");
                 SendMessage(client, $"ER Internal server error");
             }
         }
 
         private void SendMessage(TcpClient client, string message)
         {
+            //add data about client into log
+            Log.Debug($"Sending message to client: {message}");
             try
             {
                 byte[] data = Encoding.UTF8.GetBytes(message + Environment.NewLine);

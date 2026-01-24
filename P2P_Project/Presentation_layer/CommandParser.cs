@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Serilog;
+using System;
 
 namespace P2P_Project.Presentation_layer
 {
@@ -12,11 +13,13 @@ namespace P2P_Project.Presentation_layer
         public string[] Parse(string input)
         {
             if (string.IsNullOrWhiteSpace(input)) return null;
+            Log.Debug($"Parsing client input: {input}");
 
             string[] parsedCommand = input.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
             parsedCommand[0] = parsedCommand[0].ToUpper();
 
+            Log.Debug($"Parsed input: {parsedCommand}");
             return parsedCommand;
         }
 
