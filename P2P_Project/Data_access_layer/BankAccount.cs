@@ -7,6 +7,7 @@ namespace P2P_Project.Data_access_layer
         private int _accountNumber;
         private double _balance;
 
+        public BankAccount() { }
         public BankAccount(int accountNumber, float balance)
         {
             AccountNumber = accountNumber;
