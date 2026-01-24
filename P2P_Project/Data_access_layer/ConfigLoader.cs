@@ -1,29 +1,32 @@
-﻿using System.IO;
+﻿using Serilog;
+using System.IO;
 using System.Text.Json;
 
 namespace P2P_Project.Data_access_layer
 {
     public class ConfigLoader
     {
+        private static readonly ConfigLoader _instance = new ConfigLoader();
+        public static ConfigLoader Instance => _instance;
+
         private readonly string ConfigFilePath = Path.Combine("config", "config.json");
 
         private string _ipAddress;
         private int _port;
         private int _timeoutTime;
 
+        private ConfigLoader()
+        {
+            LoadConfig();
+        }
+
         public string IPAddress
         {
             get => _ipAddress;
-            set
+            private set
             {
                 if (string.IsNullOrWhiteSpace(value))
                     throw new ArgumentException("IP address cannot be empty");
-
-                string[] octets = value.Split('.');
-                if (octets.Length != 4 || !octets.All(o => int.TryParse(o, out int v) && v >= 0 && v <= 255))
-                {
-                    throw new ArgumentException($"Invalid IP address");
-                }
                 _ipAddress = value;
             }
         }
@@ -31,65 +34,46 @@ namespace P2P_Project.Data_access_layer
         public int Port
         {
             get => _port;
-            set
+            private set
             {
                 if (value < 1024 || value > 65535)
-                {
-                    throw new ArgumentException($"Port must be from range of 1024 - 65535");
-                }
+                    throw new ArgumentException("Port must be from range of 1024 - 65535");
                 _port = value;
             }
         }
+
         public int TimeoutTime
         {
             get => _timeoutTime;
-            set
+            private set
             {
                 if (value <= 0)
-                {
                     throw new ArgumentException("Timeout time must be a number greater than 0");
-                }
                 _timeoutTime = value;
             }
         }
 
-        public void LoadConfig()
+        private void LoadConfig()
         {
             try
             {
-                string jsonString = File.ReadAllText(ConfigFilePath);
 
+                string jsonString = File.ReadAllText(ConfigFilePath);
                 var configDict = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(jsonString);
 
-                string[] requiredKeys = { "IPAddress", "Port", "TimeoutTime" };
+                if (configDict.ContainsKey("IPAddress"))
+                    IPAddress = configDict["IPAddress"].GetString();
 
-                foreach (var key in requiredKeys)
-                {
-                    if (!configDict.ContainsKey(key))
-                    {
-                        throw new ArgumentException($"Missing required configuration key: {key}");
-                    }
-                }
+                if (configDict.ContainsKey("Port"))
+                    Port = configDict["Port"].GetInt32();
 
-                this.IPAddress = configDict["IPAddress"].GetString();
-                this.Port = configDict["Port"].GetInt32();
-                this.TimeoutTime = configDict["TimeoutTime"].GetInt32();
-            }
-            catch (FileNotFoundException)
-            {
-                throw new FileNotFoundException($"ER Configuration file at {ConfigFilePath} not found.");
-            }
-            catch (JsonException ex)
-            {
-                throw new Exception($"ER Incorrect configuration format: {ex.Message}");
-            }
-            catch (ArgumentException ex)
-            {
-                throw new Exception($"ER Invalid configuration: {ex.Message}");
+                if (configDict.ContainsKey("TimeoutTime"))
+                    TimeoutTime = configDict["TimeoutTime"].GetInt32();
             }
             catch (Exception ex)
             {
-                throw new Exception($"ER Failed to load configuration: {ex.Message}");
+                Log.Error($"ER Failed to load app configuration");
+                throw new Exception($"ER failed to load app configuration: {ex.Message}");
             }
         }
     }
