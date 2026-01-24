@@ -1,6 +1,7 @@
 ﻿using P2P_Project.Data_access_layer;
 using P2P_Project.Presentation_layer;
 using Serilog;
+using Serilog.Events;
 using System.Windows;
 
 
@@ -17,17 +18,26 @@ namespace P2P_Project
         private void CreateLogger()
         {
             Log.Logger = new LoggerConfiguration()
-            .MinimumLevel.Information()
-            .WriteTo.File(
-                path: "logs/myapp.txt",
-                rollingInterval: RollingInterval.Day,
-                flushToDiskInterval: TimeSpan.FromSeconds(1),
-                shared: true
-            )
+            .MinimumLevel.Debug()
+            //Logger for UI
             //.WriteTo.Observers(events => events
-            //    .Do(evt =>
-            //    {
+            //    .Do(evt => {
+            //        Application.Current.Dispatcher.Invoke(() => {
+            //            MyTextBox.AppendText($"[{evt.Level}] {evt.RenderMessage()}\n");
+            //        });
             //    }).Subscribe())
+
+            .WriteTo.File(
+                path: "logs/status.txt",
+                restrictedToMinimumLevel: LogEventLevel.Information,
+                rollingInterval: RollingInterval.Day,
+                flushToDiskInterval: TimeSpan.FromSeconds(1))
+
+            .WriteTo.File(
+                path: "logs/errors.txt",
+                restrictedToMinimumLevel: LogEventLevel.Error,
+                rollingInterval: RollingInterval.Day,
+                flushToDiskInterval: TimeSpan.FromSeconds(1))
             .CreateLogger();
         }
 
