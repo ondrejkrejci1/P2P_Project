@@ -86,7 +86,8 @@ namespace P2P_Project.Presentation_layer
                 TextBlock errorText = new TextBlock
                 {
                     Text = $"{erronName} error (Client Listener): {errorMessage}",
-                    Foreground = System.Windows.Media.Brushes.Red
+                    Foreground = System.Windows.Media.Brushes.Red,
+                    Margin = new Thickness(10, 5, 0, 0)
                 };
                 _errorPanel.Children.Add(errorText);
             });

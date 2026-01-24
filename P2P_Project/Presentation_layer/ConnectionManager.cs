@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using P2P_Project.Application_layer;
+using System.IO;
 using System.Net.Sockets;
 using System.Windows;
 using System.Windows.Controls;
@@ -17,14 +18,17 @@ namespace P2P_Project.Presentation_layer
         private StackPanel _errorPanel;
 
         private CommandParser _commandParser;
+        private CommandExecutor _commandExecutor;
 
         public ConnectionManager(TcpClient client, StackPanel errorPanel)
         {
             _commandParser = new CommandParser();
+            _commandExecutor = new CommandExecutor();
             _client = client;
             _errorPanel = errorPanel;
             _reader = new StreamReader(_client.GetStream());
             _writer = new StreamWriter(_client.GetStream()) { AutoFlush = true };
+            _isRunning = true;
         }
 
 
@@ -52,9 +56,7 @@ namespace P2P_Project.Presentation_layer
 
                 string[] parsedCommand = _commandParser.Parse(clientInput);
 
-                throw new NotImplementedException("Nic zatim");
-
-                // odeslani na command executor - parsnuty komand a tcpclient
+                _commandExecutor.ExecuteCommand(_client, parsedCommand);
 
             }
             catch (IOException)
@@ -92,7 +94,7 @@ namespace P2P_Project.Presentation_layer
                 {
                     Text = $"{erronName} error (Client Listener): {errorMessage}",
                     Foreground = System.Windows.Media.Brushes.Red,
-                    Margin = new Thickness(10)
+                    Margin = new Thickness(10,5,0,0)
 
                 };
                 _errorPanel.Children.Add(errorText);
