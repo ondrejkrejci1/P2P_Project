@@ -82,24 +82,43 @@ namespace P2P_Project.Data_access_layer
             }
         }
 
-        private void SaveAccounts()
+        public void SaveAccounts()
         {
-            try
+            lock (_lock)
             {
-                string json = JsonSerializer.Serialize(_accounts, new JsonSerializerOptions { WriteIndented = true });
-                File.WriteAllText(FilePath, json);
+                try
+                {
+                    string json = JsonSerializer.Serialize(_accounts, new JsonSerializerOptions { WriteIndented = true });
+                    File.WriteAllText(FilePath, json);
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception($"Failed to save accounts: {ex.Message}");
+                }
             }
-            catch (Exception ex)
-            {
-                throw new Exception($"Failed to save accounts: {ex.Message}");
-            }
+           
         }
 
         public List<BankAccount> GetAllAccounts()
         {
             lock (_lock)
             {
-                return _accounts.ToList();
+                return _accounts;
+            }
+        }
+
+        public BankAccount GetBankAccount(int accountNumber)
+        {
+            lock (_lock)
+            {
+                var account = _accounts.FirstOrDefault(a => a.AccountNumber == accountNumber);
+
+                if (account == null)
+                {
+                    throw new KeyNotFoundException($"Account {accountNumber} not found.");
+                }
+
+                return account;
             }
         }
     }
