@@ -10,7 +10,7 @@ namespace P2P_Project.Presentation_layer
         private TcpListener _listener;
         private bool _isRunning;
         private Thread _clientAcceptor;
-        private List<ConnectionManager> _clients;
+        private List<TcpConnection> _clients;
 
         private string _ipAddress;
         private int _port;
@@ -22,7 +22,7 @@ namespace P2P_Project.Presentation_layer
         public ClientListener(string ipAddress, int port, int _timeoutTime, StackPanel errorPanel, StackPanel clientPanel)
         {
             _listener = new TcpListener(IPAddress.Parse(ipAddress), port);
-            _clients = new List<ConnectionManager>();
+            _clients = new List<TcpConnection>();
             _ipAddress = ipAddress;
             _port = port;
             this._timeoutTime = _timeoutTime;
@@ -47,9 +47,9 @@ namespace P2P_Project.Presentation_layer
                 try
                 {
                     TcpClient client = _listener.AcceptTcpClient();
-                    ConnectionManager connectionManager = new ConnectionManager(client,_errorPanel,_clientPanel);
-                    _clients.Add(connectionManager);
-                    connectionManager.Run();
+                    TcpConnection connection = new TcpConnection(client,_errorPanel,_clientPanel);
+                    _clients.Add(connection);
+                    connection.Run();
 
 
                 }
