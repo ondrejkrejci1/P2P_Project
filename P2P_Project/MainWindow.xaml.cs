@@ -17,7 +17,7 @@ namespace P2P_Project
         private void CreateLogger()
         {
             Log.Logger = new LoggerConfiguration()
-            .MinimumLevel.Debug()
+            .MinimumLevel.Information()
             .WriteTo.File(
                 path: "logs/myapp.txt",
                 rollingInterval: RollingInterval.Day,
