@@ -1,11 +1,5 @@
 ﻿using P2P_Project.Data_access_layer;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using P2P_Project.Data_access_layer;
 using System.Linq;
 
 namespace P2P_Project.Application_layer
@@ -24,56 +18,81 @@ namespace P2P_Project.Application_layer
             _configLoader = ConfigLoader.Instance;
         }
 
-        public string GetBankCode()
-        {
-            return $"BC {_configLoader.IPAddress}";
-        }
+        public string GetBankCode() => $"BC {_configLoader.IPAddress}";
+
         public string CreateAccount()
         {
             int accNum = _repository.CreateAccount();
             return $"AC {accNum}/{_configLoader.IPAddress}";
         }
 
-        public string Deposit(int accNum, string ip, double amount)
+        public string Deposit(int accountNumber, string ip, double amount)
         {
-            var account = _repository.GetBankAccount(accNum);
-            if (account == null) return "ER AD Failed: Account not found";
+            try
+            {
+                var account = _repository.GetBankAccount(accountNumber);
+                if (account == null) return "ER AD Failed: Account not found";
 
-            account.Balance += amount;
-            _repository.SaveAccounts();
-            return "AD";
+                account.Balance += amount;
+                _repository.SaveAccounts();
+                return "AD";
+            }
+            catch
+            {
+                return "ER Internal server error";
+            }
         }
 
-        public string Withdraw(int accNum, string ip, double amount)
+        public string Withdraw(int accountNumber, string ip, double amount)
         {
-            var account = _repository.GetBankAccount(accNum);
-            if (account == null) return "ER AW Failed: Account not found";
+            try
+            {
+                var account = _repository.GetBankAccount(accountNumber);
+                if (account == null) return "ER AW Failed: Account not found";
 
-            if (account.Balance < amount) return "ER AW: failed insufficient funds";
+                if (account.Balance < amount) return "ER AW Failed: Insufficient funds";
 
-            account.Balance -= amount;
-            _repository.SaveAccounts();
-            return "AW";
+                account.Balance -= amount;
+                _repository.SaveAccounts();
+                return "AW";
+            }
+            catch
+            {
+                return "ER Internal server error";
+            }
         }
 
-        public string GetBalance(int accNum, string ip)
+        public string GetBalance(int accountNumber, string ip)
         {
-            var account = _repository.GetBankAccount(accNum);
-            if (account == null) return "ER AB failed: Account not found";
+            try
+            {
+                var account = _repository.GetBankAccount(accountNumber);
+                if (account == null) return "ER AB Failed: Account not found";
 
-            return $"AB {account.Balance}";
+                return $"AB {account.Balance}";
+            }
+            catch
+            {
+                return "ER Internal server error";
+            }
         }
 
-        public string RemoveAccount(int accountNumer, string ip)
+        public string RemoveAccount(int accountNumber, string ip)
         {
+            try
+            {
+                var account = _repository.GetBankAccount(accountNumber);
+                if (account == null) return "ER AR Failed: Account not found";
 
-            var account = _repository.GetBankAccount(accountNumer);
-            if (account == null) return "ER AR Failed: Account not found";
+                if (account.Balance > 0) return "ER AR Failed: Balance must be 0";
 
-            if (account.Balance > 0) return "ER AR Failed: Balance must be 0";
-
-            _repository.DeleteAccount(accountNumer);
-            return "AR";
+                _repository.DeleteAccount(accountNumber);
+                return "AR";
+            }
+            catch
+            {
+                return "ER Internal server error";
+            }
         }
 
         public string GetTotalAmount()
@@ -83,11 +102,6 @@ namespace P2P_Project.Application_layer
             return $"BA {total}";
         }
 
-        public string GetClientCount()
-        {
-            var accounts = _repository.GetAllAccounts();
-            return $"BN {_repository.GetAllAccounts().Count}";
-        }
-
+        public string GetClientCount() => $"BN {_repository.GetAllAccounts().Count}";
     }
 }
