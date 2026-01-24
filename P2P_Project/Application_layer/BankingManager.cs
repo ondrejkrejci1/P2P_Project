@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace P2P_Project.Application_layer
 {
-    public sealed class BankingManager
+    public class BankingManager
     {
         private static BankingManager _instance = new BankingManager();
         public static BankingManager Instance => _instance;
