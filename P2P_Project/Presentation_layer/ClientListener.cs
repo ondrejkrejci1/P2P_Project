@@ -51,6 +51,11 @@ namespace P2P_Project.Presentation_layer
                 }
                 catch (SocketException socketEx)
                 {
+                    if (!_isRunning)
+                    {
+                        return;
+                    }
+
                     ErrorLog("Socket", socketEx.Message);
                 }
                 catch (Exception ex)
@@ -85,6 +90,20 @@ namespace P2P_Project.Presentation_layer
                 };
                 _errorPanel.Children.Add(errorText);
             });
+        }
+
+        public void Stop()
+        {
+            _isRunning = false;
+            _listener.Stop();
+            if (_clientAcceptor.IsAlive)
+                _clientAcceptor.Join(1000);
+            
+
+            foreach (var client in _clients)
+            {
+                client.Stop();
+            }
         }
 
     }

@@ -51,5 +51,15 @@ namespace P2P_Project
             _clientListener = new ClientListener("127.0.0.1", 8000, 50, ErrorPanel); //(_configLoader.IPAddress,_configLoader.Port, _configLoader.TimeoutTime, Errors);
             _clientListener.Start();
         }
+
+        protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
+        {
+            if (_clientListener != null)
+            {
+                _clientListener.Stop();
+            }
+
+            base.OnClosing(e);
+        }
     }
 }

@@ -57,6 +57,16 @@ namespace P2P_Project.Presentation_layer
                 // odeslani na command executor - parsnuty komand a tcpclient
 
             }
+            catch (IOException)
+            {
+                if (!_isRunning)
+                {
+                    return;
+                }
+
+                ErrorLog("Communication", "Connection unexpectedly terminated.");
+                _isRunning = false;
+            }
             catch (Exception ex)
             {
                 ErrorLog("Communication", ex.Message);
@@ -64,11 +74,14 @@ namespace P2P_Project.Presentation_layer
 
         }
 
-        private void Stop()
+        public void Stop()
         {
+            // poslani erroru uzivatelum o necekane chybe serveru
+
             _isRunning = false;
+            if (_clientThread != null )
+                _clientThread.Join(1000);
             _client.Close();
-            _clientThread.Join();
         }
 
         private void ErrorLog(string erronName, string errorMessage)
@@ -78,7 +91,9 @@ namespace P2P_Project.Presentation_layer
                 TextBlock errorText = new TextBlock
                 {
                     Text = $"{erronName} error (Client Listener): {errorMessage}",
-                    Foreground = System.Windows.Media.Brushes.Red
+                    Foreground = System.Windows.Media.Brushes.Red,
+                    Margin = new Thickness(10)
+
                 };
                 _errorPanel.Children.Add(errorText);
             });
