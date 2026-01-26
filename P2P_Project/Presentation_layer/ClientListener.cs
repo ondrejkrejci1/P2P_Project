@@ -18,8 +18,9 @@ namespace P2P_Project.Presentation_layer
 
         private StackPanel _errorPanel;
         private StackPanel _clientPanel;
+        private TextBlock _clientCounter;
 
-        public ClientListener(string ipAddress, int port, int _timeoutTime, StackPanel errorPanel, StackPanel clientPanel)
+        public ClientListener(string ipAddress, int port, int _timeoutTime, StackPanel errorPanel, StackPanel clientPanel, TextBlock clientCounter)
         {
             _listener = new TcpListener(IPAddress.Parse(ipAddress), port);
             _clients = new List<TcpConnection>();
@@ -29,6 +30,7 @@ namespace P2P_Project.Presentation_layer
 
             _errorPanel = errorPanel;
             _clientPanel = clientPanel;
+            _clientCounter = clientCounter;
             _clientAcceptor = new Thread(AcceptClient);
         }
 
@@ -47,10 +49,14 @@ namespace P2P_Project.Presentation_layer
                 try
                 {
                     TcpClient client = _listener.AcceptTcpClient();
-                    TcpConnection connection = new TcpConnection(client,_errorPanel,_clientPanel);
-                    _clients.Add(connection);
-                    connection.Run();
 
+                    ConfigureKeepAlive(client.Client);
+
+                    TcpConnection connection = new TcpConnection(client, this, _errorPanel, _clientPanel, _clientCounter);
+                    _clients.Add(connection);
+                    connection.Start();
+
+                    DisplayClient(client.Client);
 
                 }
                 catch (SocketException socketEx)
@@ -70,17 +76,12 @@ namespace P2P_Project.Presentation_layer
             }
         }
 
-
-        private string GetLocalIPAddress()
+        private void ConfigureKeepAlive(Socket socket)
         {
-            var host = Dns.GetHostEntry(Dns.GetHostName());
-            var ipAddress = host.AddressList
-                .FirstOrDefault(ip => ip.AddressFamily == AddressFamily.InterNetwork);
-
-            if (ipAddress == null)
-                ErrorLog("Unknown IP Address", "Automatic ip setting couldnt find IP address of this device");
-
-            return ipAddress.ToString();
+            socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
+            socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveTime, 20);
+            socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveInterval, 2);
+            socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveRetryCount, 3);
         }
 
         private void ErrorLog(string erronName, string errorMessage)
@@ -97,6 +98,26 @@ namespace P2P_Project.Presentation_layer
             });
         }
 
+        private void DisplayClient(Socket socket)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+
+                int displyedCount = int.Parse(_clientCounter.Text);
+                displyedCount++;
+                _clientCounter.Text = displyedCount.ToString();
+
+                TextBlock client = new TextBlock
+                {
+                    Text = $"{displyedCount} - Client: {socket.RemoteEndPoint.ToString()}",
+                    Margin = new Thickness(10, 5, 0, 0),
+                    Tag = socket.RemoteEndPoint.ToString()
+                };
+
+                _clientPanel.Children.Add(client);
+            });
+        }
+
         public void Stop()
         {
             _isRunning = false;
@@ -109,6 +130,31 @@ namespace P2P_Project.Presentation_layer
             {
                 client.Stop();
             }
+        }
+
+        public void ClientDisconected(TcpConnection client)
+        {
+            if (!_clients.Contains(client)) return;
+
+            _clients.Remove(client);
+
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                int displyedCount = int.Parse(_clientCounter.Text);
+                displyedCount--;
+                _clientCounter.Text = displyedCount.ToString();
+
+                TextBlock[] clientTextboxes = _clientPanel.Children.OfType<TextBlock>().ToArray();
+
+                foreach (var item in clientTextboxes)
+                {
+                    if (item.Tag.ToString() == client.Client.Client.RemoteEndPoint.ToString())
+                    {
+                        _clientPanel.Children.Remove(item);
+                        break;
+                    }
+                }
+            });
         }
 
     }

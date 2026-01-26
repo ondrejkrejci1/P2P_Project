@@ -8,33 +8,44 @@ namespace P2P_Project.Presentation_layer
 {
     public class TcpConnection
     {
-        private TcpClient _client;
+        public TcpClient Client { private set; get; }
         private Thread _clientThread;
         private bool _isRunning;
+        private ClientListener _clientListener;
 
         private StreamReader _reader;
         private StreamWriter _writer;
 
         private StackPanel _errorPanel;
         private StackPanel _clientPanel;
+        private TextBlock _clientCounter;
 
         private CommandParser _commandParser;
         private CommandExecutor _commandExecutor;
 
-        public TcpConnection(TcpClient client, StackPanel errorPanel, StackPanel clientPanel)
+        public TcpConnection(TcpClient client, ClientListener listener, StackPanel errorPanel, StackPanel clientPanel, TextBlock clientCounter)
         {
             _commandParser = new CommandParser();
             _commandExecutor = new CommandExecutor();
-            _client = client;
-            _errorPanel = errorPanel;
-            _reader = new StreamReader(_client.GetStream());
-            _writer = new StreamWriter(_client.GetStream()) { AutoFlush = true };
+            Client = client;
+            _clientListener = listener;
+            _reader = new StreamReader(Client.GetStream());
+            _writer = new StreamWriter(Client.GetStream()) { AutoFlush = true };
             _isRunning = true;
+            _errorPanel = errorPanel;
             _clientPanel = clientPanel;
+            _clientCounter = clientCounter;
+
+            _clientThread = new Thread(Run);
         }
 
 
-        public void Run()
+        public void Start()
+        {
+            _clientThread.Start();
+        }
+
+        private void Run()
         {
             try
             {
@@ -48,6 +59,12 @@ namespace P2P_Project.Presentation_layer
             {
                 ErrorLog("RunLoop", ex.Message);
             }
+            finally
+            {
+                _clientListener.ClientDisconected(this);
+                Stop();
+            }
+
         }
 
         private void Do()
@@ -56,9 +73,15 @@ namespace P2P_Project.Presentation_layer
             {
                 string clientInput = _reader.ReadLine();
 
+                if (clientInput == null)
+                {
+                    _isRunning = false;
+                    return;
+                }
+
                 string[] parsedCommand = _commandParser.Parse(clientInput);
 
-                _commandExecutor.ExecuteCommand(_client, parsedCommand);
+                _commandExecutor.ExecuteCommand(Client, parsedCommand);
 
             }
             catch (IOException)
@@ -85,7 +108,7 @@ namespace P2P_Project.Presentation_layer
             _isRunning = false;
             if (_clientThread != null )
                 _clientThread.Join(1000);
-            _client.Close();
+            Client.Close();
         }
 
         private void ErrorLog(string erronName, string errorMessage)
@@ -94,7 +117,7 @@ namespace P2P_Project.Presentation_layer
             {
                 TextBlock errorText = new TextBlock
                 {
-                    Text = $"{erronName} error (Client Listener): {errorMessage}",
+                    Text = $"{erronName} error (Client Connection): {errorMessage}",
                     Foreground = System.Windows.Media.Brushes.Red,
                     Margin = new Thickness(10,5,0,0)
 
