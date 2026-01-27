@@ -1,7 +1,6 @@
 ﻿using Serilog;
 using System.IO;
 using System.Text.Json;
-using System.Net;
 
 namespace P2P_Project.Data_access_layer
 {
