@@ -30,14 +30,14 @@ namespace P2P_Project.Application_layer
         {
             try
             {
-                var account = _repository.GetBankAccount(accountNumber);
-                if (account == null) return "ER AD Failed: Account not found";
-
-                account.Balance += amount;
-                _repository.SaveAccounts();
+                _repository.Deposit(accountNumber, amount);
                 return "AD";
             }
-            catch
+            catch (KeyNotFoundException)
+            {
+                return "ER AD Failed: Account not found";
+            }
+            catch (Exception)
             {
                 return "ER Internal server error";
             }
@@ -47,16 +47,18 @@ namespace P2P_Project.Application_layer
         {
             try
             {
-                var account = _repository.GetBankAccount(accountNumber);
-                if (account == null) return "ER AW Failed: Account not found";
-
-                if (account.Balance < amount) return "ER AW Failed: Insufficient funds";
-
-                account.Balance -= amount;
-                _repository.SaveAccounts();
+                _repository.Withdraw(accountNumber, amount);
                 return "AW";
             }
-            catch
+            catch (KeyNotFoundException)
+            {
+                return "ER AW Failed: Account not found";
+            }
+            catch (InvalidOperationException ex)
+            {
+                return $"ER AW Failed: {ex.Message}";
+            }
+            catch (Exception)
             {
                 return "ER Internal server error";
             }
@@ -98,7 +100,7 @@ namespace P2P_Project.Application_layer
         public string GetTotalAmount()
         {
             var accounts = _repository.GetAllAccounts();
-            long total = (long)accounts.Sum(a => a.Balance);
+            long total = accounts.Sum(a => a.Balance);
             return $"BA {total}";
         }
 

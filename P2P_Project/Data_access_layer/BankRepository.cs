@@ -105,7 +105,7 @@ namespace P2P_Project.Data_access_layer
         {
             lock (_lock)
             {
-                return _accounts;
+                return _accounts.ToList();
             }
         }
 
@@ -123,5 +123,32 @@ namespace P2P_Project.Data_access_layer
                 return account;
             }
         }
+
+        public void Deposit(int accountNumber, long amount)
+        {
+            lock (_lock)
+            {
+                var account = _accounts.FirstOrDefault(a => a.AccountNumber == accountNumber);
+                if (account == null) throw new KeyNotFoundException($"Account {accountNumber} not found.");
+
+                account.Balance += amount;
+                SaveAccounts();
+            }
+        }
+
+        public void Withdraw(int accountNumber, long amount)
+        {
+            lock (_lock)
+            {
+                var account = _accounts.FirstOrDefault(a => a.AccountNumber == accountNumber);
+                if (account == null) throw new KeyNotFoundException($"Account {accountNumber} not found.");
+
+                if (account.Balance < amount) throw new InvalidOperationException("Insufficient funds.");
+
+                account.Balance -= amount;
+                SaveAccounts();
+            }
+        }
+
     }
 }
