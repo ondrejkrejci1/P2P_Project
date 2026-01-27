@@ -52,12 +52,13 @@ namespace P2P_Project.Presentation_layer
 
         private void Run()
         {
+            Log.Debug("Connection thread started for client.");
             try
             {
                 do
                 {
                     Do();
-                } 
+                }
                 while (_isRunning);
             }
             catch (Exception ex)
@@ -66,10 +67,10 @@ namespace P2P_Project.Presentation_layer
             }
             finally
             {
+                Log.Debug("Closing client connection and stopping thread.");
                 _clientListener.ClientDisconected(this);
                 Stop();
             }
-
         }
 
         private void Do()
@@ -77,15 +78,15 @@ namespace P2P_Project.Presentation_layer
             try
             {
                 string clientInput = _reader.ReadLine();
-
                 if (clientInput == null)
                 {
+                    Log.Debug("Client closed the stream (received null).");
                     _isRunning = false;
                     return;
                 }
 
+                Log.Debug("Received raw input: {Input}", clientInput);
                 string[] parsedCommand = _commandParser.Parse(clientInput);
-
                 _commandExecutor.ExecuteCommand(Client, parsedCommand);
 
                 if (parsedCommand[0] == "AC" || parsedCommand[0] == "AR")
@@ -97,31 +98,26 @@ namespace P2P_Project.Presentation_layer
                     LoadBankAmount();
                 }
             }
-            catch (IOException)
+            catch (IOException ex)
             {
                 if (!_isRunning)
                 {
                     return;
                 }
 
-                Log.Error($"Communication: Connection unexpectedly terminated.");
+                ErrorLog("Communication", "Connection unexpectedly terminated.");
                 _isRunning = false;
             }
             catch (Exception ex)
             {
                 Log.Error($"Communication {ex.Message}");
             }
-
         }
 
         public void Stop()
         {
 
             _isRunning = false;
-            if (_clientThread != null )
-                _clientThread.Join(1000);
-            Client.Close();
-        }
 
         private void LoadNumberOfClients()
         {

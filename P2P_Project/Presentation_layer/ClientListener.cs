@@ -41,11 +41,21 @@ namespace P2P_Project.Presentation_layer
 
         public void Start()
         {
-            _listener.Start();
-            _isRunning = true;
-            _clientAcceptor.Start();
+            try
+            {
+                _listener.Start();
+                _isRunning = true;
+                _clientAcceptor.Start();
+                Log.Information("Server started on {IP}:{Port}", _ipAddress, _port);
+            }
+            catch (Exception ex)
+            {
+                Log.Fatal(ex, "Failed to start TcpListener.");
+            }
         }
 
+
+        private readonly object _listLock = new object();
 
         private void AcceptClient()
         {
@@ -60,26 +70,21 @@ namespace P2P_Project.Presentation_layer
                     TcpConnection connection = new TcpConnection(client, this, _clientPanel, _clientCount, _numberOfClients, _bankAmount);
                     _clients.Add(connection);
                     connection.Start();
-
                     DisplayClient(client.Client);
                     Log.Debug($"Client connected - {client.Client.RemoteEndPoint.ToString()}");
 
                 }
                 catch (SocketException socketEx)
                 {
-                    Log.Error($"Socket - {socketEx.Message}");
-
-                    if (!_isRunning)
+                    if (!_isRunning) return;
+                    Log.Error(socketEx, "Socket error during client acceptance.");
+                    if (socketEx.SocketErrorCode == SocketError.NetworkUnreachable)
                     {
-                        return;
+                        Log.Error($"Network connection lost: {socketEx.Message}");
+                        Stop();
+                        break;
                     }
-
                 }
-                catch (Exception ex)
-                {
-                    Log.Error($"General - {ex.Message}");
-                }
-
             }
         }
 
