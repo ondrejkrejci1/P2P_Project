@@ -1,5 +1,34 @@
 # Changelog
 
+## 27.1.2025
+
+### Updated
+
+#### Yang
+
+- Add logging to some functions
+
+### Fixed
+
+#### Yang
+
+- Add missing lock on some functions
+
+### Added
+
+#### Yang
+
+- Add network scanner
+- Bank robbery command
+
+## 26.1.2025
+
+### Update
+
+#### Yang
+
+- Add more settings to configuration file
+
 ## 24.1.2025
 
 ### Changed
