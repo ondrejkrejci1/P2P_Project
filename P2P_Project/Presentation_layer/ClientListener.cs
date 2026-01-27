@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using Serilog;
+using System.Net;
 using System.Net.Sockets;
 using System.Windows;
 using System.Windows.Controls;
@@ -42,6 +43,8 @@ namespace P2P_Project.Presentation_layer
         }
 
 
+        private readonly object _listLock = new object();
+
         private void AcceptClient()
         {
             while (_isRunning)
@@ -49,30 +52,22 @@ namespace P2P_Project.Presentation_layer
                 try
                 {
                     TcpClient client = _listener.AcceptTcpClient();
-
-                    ConfigureKeepAlive(client.Client);
-
                     TcpConnection connection = new TcpConnection(client, this, _errorPanel, _clientPanel, _clientCounter);
-                    _clients.Add(connection);
+
+                    lock (_listLock) { _clients.Add(connection); }
                     connection.Start();
-
                     DisplayClient(client.Client);
-
                 }
                 catch (SocketException socketEx)
                 {
-                    if (!_isRunning)
+                    if (!_isRunning) return;
+                    if (socketEx.SocketErrorCode == SocketError.NetworkUnreachable)
                     {
-                        return;
+                        Log.Error($"Network connection lost: {socketEx.Message}");
+                        Stop();
+                        break;
                     }
-
-                    ErrorLog("Socket", socketEx.Message);
                 }
-                catch (Exception ex)
-                {
-                    ErrorLog("General", ex.Message);
-                }
-
             }
         }
 
