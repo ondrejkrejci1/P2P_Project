@@ -5,10 +5,10 @@ namespace P2P_Project.Data_access_layer
     public class BankAccount
     {
         private int _accountNumber;
-        private double _balance;
+        private long _balance;
 
         public BankAccount() { }
-        public BankAccount(int accountNumber, float balance)
+        public BankAccount(int accountNumber, long balance)
         {
             AccountNumber = accountNumber;
             Balance = balance;
@@ -27,7 +27,7 @@ namespace P2P_Project.Data_access_layer
             }
         }
 
-        public double Balance
+        public long Balance
         {
             get => _balance;
             set

@@ -1,5 +1,4 @@
-﻿using P2P_Project.Data_access_layer;
-using P2P_Project.Presentation_layer;
+﻿using P2P_Project.Presentation_layer;
 using System;
 using System.Net.Sockets;
 
@@ -47,27 +46,14 @@ namespace P2P_Project.Application_layer
             {
                 if (args.Length < 3 ||
                     !TryParseAccountArg(args[1], out int accountNumber, out string ip) ||
-                    !double.TryParse(args[2], out double amount))
+                    !long.TryParse(args[2], out long amount))
                 {
                     ConnectionManager.Instance.SendMessage(client, "ER AD Failed: Invalid arguments");
                     return;
                 }
 
-                string result = "ER AD Failed: Couldnt proccess the request";
-
-                if (ip == ConfigLoader.Instance.IPAddress)
-                {
-                    result = BankingManager.Instance.Deposit(accountNumber, ip, amount);
-                }
-                else
-                {
-                    ProxyClient proxyClient = new ProxyClient(System.Net.IPAddress.Parse(ip));
-                    string request = string.Join(" ",args);
-                    result = proxyClient.ForwardRequest(request);
-                }
-
+                string result = BankingManager.Instance.Deposit(accountNumber, ip, amount);
                 ConnectionManager.Instance.SendMessage(client, result);
-
             }
         }
 
@@ -77,26 +63,13 @@ namespace P2P_Project.Application_layer
             {
                 if (args.Length < 3 ||
                     !TryParseAccountArg(args[1], out int accountNumber, out string ip) ||
-                    !double.TryParse(args[2], out double amount))
+                    !long.TryParse(args[2], out long amount))
                 {
                     ConnectionManager.Instance.SendMessage(client, "ER AW Failed: Invalid arguments");
                     return;
                 }
 
-                string result = "ER AW Failed: Couldnt proccess the request";
-
-                if (ip == ConfigLoader.Instance.IPAddress)
-                {
-                    result = BankingManager.Instance.Withdraw(accountNumber, ip, amount);
-
-                }
-                else
-                {
-                    ProxyClient proxyClient = new ProxyClient(System.Net.IPAddress.Parse(ip));
-                    string request = string.Join(" ", args);
-                    result = proxyClient.ForwardRequest(request);
-                }
-
+                string result = BankingManager.Instance.Withdraw(accountNumber, ip, amount);
                 ConnectionManager.Instance.SendMessage(client, result);
             }
         }
@@ -112,19 +85,7 @@ namespace P2P_Project.Application_layer
                     return;
                 }
 
-                string result = "ER AB Failed: Couldnt proccess the request";
-
-                if (ip == ConfigLoader.Instance.IPAddress)
-                {
-                    result = BankingManager.Instance.GetBalance(accountNumber, ip);
-                }
-                else
-                {
-                    ProxyClient proxyClient = new ProxyClient(System.Net.IPAddress.Parse(ip));
-                    string request = string.Join(" ", args);
-                    result = proxyClient.ForwardRequest(request);
-                }
-
+                string result = BankingManager.Instance.GetBalance(accountNumber, ip);
                 ConnectionManager.Instance.SendMessage(client, result);
             }
         }
@@ -140,19 +101,7 @@ namespace P2P_Project.Application_layer
                     return;
                 }
 
-                string result = "ER AR Failed: Couldnt proccess the request";
-
-                if (ip == ConfigLoader.Instance.IPAddress)
-                {
-                    result = BankingManager.Instance.RemoveAccount(accountNumber, ip);
-                }
-                else
-                {
-                    ProxyClient proxyClient = new ProxyClient(System.Net.IPAddress.Parse(ip));
-                    string request = string.Join(" ", args);
-                    result = proxyClient.ForwardRequest(request);
-                }
-
+                string result = BankingManager.Instance.RemoveAccount(accountNumber, ip);
                 ConnectionManager.Instance.SendMessage(client, result);
             }
         }
@@ -175,12 +124,12 @@ namespace P2P_Project.Application_layer
             }
         }
 
-
-        private bool DiferentBankCommand(string command)
+        public class RobberyPlan : IBankCommand
         {
-            string localIP = ConfigLoader.Instance.IPAddress;
+            public void Execute(TcpClient client, string[] args)
+            {
 
-            return false;
+            }
         }
     }
 }

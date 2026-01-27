@@ -26,7 +26,7 @@ namespace P2P_Project.Application_layer
             return $"AC {accNum}/{_configLoader.IPAddress}";
         }
 
-        public string Deposit(int accountNumber, string ip, double amount)
+        public string Deposit(int accountNumber, string ip, long amount)
         {
             try
             {
@@ -43,7 +43,7 @@ namespace P2P_Project.Application_layer
             }
         }
 
-        public string Withdraw(int accountNumber, string ip, double amount)
+        public string Withdraw(int accountNumber, string ip, long amount)
         {
             try
             {
