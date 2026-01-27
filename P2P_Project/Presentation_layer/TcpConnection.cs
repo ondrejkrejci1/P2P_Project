@@ -1,4 +1,5 @@
 ﻿using P2P_Project.Application_layer;
+using Serilog;
 using System.IO;
 using System.Net.Sockets;
 using System.Windows;
@@ -57,7 +58,7 @@ namespace P2P_Project.Presentation_layer
             }
             catch (Exception ex)
             {
-                ErrorLog("RunLoop", ex.Message);
+                Log.Error($"ER: {ex.Message}");
             }
             finally
             {
@@ -84,48 +85,38 @@ namespace P2P_Project.Presentation_layer
                 _commandExecutor.ExecuteCommand(Client, parsedCommand);
 
             }
-            catch (IOException)
+            catch (IOException ex)
             {
                 if (!_isRunning)
                 {
                     return;
                 }
 
-                ErrorLog("Communication", "Connection unexpectedly terminated.");
+                Log.Error($"ER: {ex.Message}");
                 _isRunning = false;
             }
             catch (Exception ex)
             {
-                ErrorLog("Communication", ex.Message);
+                Log.Error($"ER: {ex.Message}");
             }
 
         }
 
         public void Stop()
         {
-            // poslani erroru uzivatelum o necekane chybe serveru
-
+            if (!_isRunning) return;
             _isRunning = false;
-            if (_clientThread != null )
-                _clientThread.Join(1000);
-            Client.Close();
-        }
 
-        private void ErrorLog(string erronName, string errorMessage)
-        {
-            Application.Current.Dispatcher.Invoke(() =>
+            try
             {
-                TextBlock errorText = new TextBlock
-                {
-                    Text = $"{erronName} error (Client Connection): {errorMessage}",
-                    Foreground = System.Windows.Media.Brushes.Red,
-                    Margin = new Thickness(10,5,0,0)
+                _reader?.Close();
+                _writer?.Close();
+                Client?.Close();
+            }
+            catch {}
 
-                };
-                _errorPanel.Children.Add(errorText);
-            });
+            if (_clientThread != null && _clientThread.IsAlive)
+                _clientThread.Interrupt();
         }
-
-
     }
 }
