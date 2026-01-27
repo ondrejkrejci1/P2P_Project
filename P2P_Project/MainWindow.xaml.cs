@@ -62,8 +62,7 @@ namespace P2P_Project
 
             LoadNumberOfClients();
             LoadBankAmount();
-
-            Log.Debug($"Bank node started");            
+       
         }
 
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)

@@ -105,19 +105,35 @@ namespace P2P_Project.Presentation_layer
                     return;
                 }
 
-                ErrorLog("Communication", "Connection unexpectedly terminated.");
+                Log.Error($"ER: {ex.Message}");
                 _isRunning = false;
             }
             catch (Exception ex)
             {
-                Log.Error($"Communication {ex.Message}");
+                Log.Error($"ER: {ex.Message}");
             }
         }
 
         public void Stop()
         {
+            if (!_isRunning) return;
 
             _isRunning = false;
+
+            try
+
+
+            {
+                _reader?.Close();
+                _writer?.Close();
+                Client?.Close();
+            }
+            catch { }
+
+            if (_clientThread != null && _clientThread.IsAlive)
+                _clientThread.Interrupt();
+
+        }
 
         private void LoadNumberOfClients()
         {
