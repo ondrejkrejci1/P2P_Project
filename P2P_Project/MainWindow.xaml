@@ -5,28 +5,29 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:P2P_Project"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        ResizeMode="NoResize"
+        Title="KO-YZX" Height="450" Width="800">
 
 
 
-    <Grid>
+    <Grid Background="FloralWhite">
         <Grid.RowDefinitions>
-            <RowDefinition Height="70"/>
+            <RowDefinition Height="65"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Text="Node KO-YZX" Height="80" FontWeight="ExtraBold" FontSize="42" Background="#232528" Foreground="FloralWhite" Padding="15, 6"  />
+        <TextBlock Grid.Row="0" Text="Node KO-YZX" Height="65" FontWeight="ExtraBold" FontSize="42" Background="#232528" Foreground="FloralWhite" Padding="15, 6"  />
 
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition/>
+                <ColumnDefinition Width="1.6*"/>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
 
-            <StackPanel Grid.Row="1"  Margin="15">
-                <TextBlock Text="Logs" FontWeight="Bold" Foreground="#232528" FontSize="28" HorizontalAlignment="Left"/>
+            <StackPanel Grid.Row="1"  Margin="15,10">
+                <TextBlock Text="Logs" FontWeight="UltraBold" Foreground="#232528" FontSize="32" HorizontalAlignment="Left"/>
 
-                <ScrollViewer Height="300" Width="370" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Left" VerticalAlignment="Top"  Background="#F7F7FF">
+                <ScrollViewer Height="300" Width="450" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Left" VerticalAlignment="Top"  Background="#FFFFFF">
 
                     <StackPanel x:Name="LoggerPanel"/>
 
@@ -36,36 +37,56 @@
 
             <Grid Grid.Column="1" Margin="0">
 
-                <Grid.RowDefinitions >
-                    <RowDefinition/>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="2.5*"/>
                     <RowDefinition/>
                 </Grid.RowDefinitions>
 
-                <TextBlock Text="Clients" FontWeight="Bold" Foreground="#232528" FontSize="28" HorizontalAlignment="Left" VerticalAlignment="Top" Height="40" Margin="10,15,0,0"/>
+                <StackPanel Margin="10,10">
+                    <TextBlock Text="Clients" FontWeight="UltraBold" Foreground="#232528" FontSize="32" HorizontalAlignment="Left" VerticalAlignment="Top" Height="40"/>
 
-                <Border Margin="10,50,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="89" Height="94" CornerRadius="20" Background="#45AC1F">
-                    <TextBlock x:Name="ClientCounter" Text="0" FontSize="65" Foreground="White" FontWeight="Bold" TextAlignment="Center" />
-                </Border>
+                    <ScrollViewer Height="200" Width="265"  VerticalScrollBarVisibility="Auto" HorizontalAlignment="Left" VerticalAlignment="Top" Background="#FFFFFF">
 
-                <ScrollViewer Height="150" Width="240" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="130,20,15,0" Background="#F7F7FF">
-
-                    <StackPanel x:Name="ClientPanel"/>
-
-                </ScrollViewer>
-
-                <StackPanel Grid.Row="1"  Margin="10,0,15,15">
-                    <TextBlock Text="Errors" FontWeight="Bold" Foreground="#232528" FontSize="28" HorizontalAlignment="Left"/>
-
-                    <ScrollViewer Height="130" Width="370" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Left" VerticalAlignment="Top"  Background="#F7F7FF">
-
-                        <StackPanel x:Name="ErrorPanel"/>
+                        <StackPanel x:Name="ClientPanel"/>
 
                     </ScrollViewer>
-
                 </StackPanel>
+
+                <Grid Grid.Row="1" >
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+
+                    <Border HorizontalAlignment="Left" VerticalAlignment="Top" Width="90" Height="84" CornerRadius="20" Background="#423E3B" MouseEnter="ShowActiveClients" MouseLeave="HideActiveClients">
+                        <TextBlock x:Name="ActiveClients" Text="0" FontSize="50" Foreground="White" FontWeight="Bold" TextAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <Border Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Top" Width="90" Height="84" CornerRadius="20" Background="#FF2E00" MouseEnter="ShowNumberOfClients" MouseLeave="HideNumberOfClients">
+                        <TextBlock x:Name="NumberOfClients" Text="0" FontSize="50" Foreground="White" FontWeight="Bold" TextAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <Border Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Top" Width="90" Height="84" CornerRadius="20" Background="#5448C8" MouseEnter="ShowBankAmount" MouseLeave="HideBankAmount">
+                        <TextBlock x:Name="BankAmount" Text="0" FontSize="50" Foreground="White" FontWeight="Bold" TextAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                </Grid>
+
 
             </Grid>
         </Grid>
-
+        <Canvas>
+            <Border x:Name="ActiveClientsHover" Background="#423E3B" Width="180" Canvas.Left="515" Canvas.Top="310" Padding="5" CornerRadius="10" Visibility="Hidden">
+                <TextBlock Text="Number of connected clients" Foreground="White" FontWeight="Bold"/>
+            </Border>
+        </Canvas>
+        <Canvas>
+            <Border x:Name="NumberOfClientsHover" Background="#FF2E00" Width="150" Canvas.Left="620" Canvas.Top="310" Padding="5" CornerRadius="10" Visibility="Hidden">
+                <TextBlock  Text="Number of bank clients" Foreground="White" FontWeight="Bold"/>
+            </Border>
+        </Canvas>
+        <Canvas>
+            <Border x:Name="BankAmountHover" Background="#5448C8" Width="140" Canvas.Left="630" Canvas.Top="310" Padding="5" CornerRadius="10" Visibility="Hidden">
+                <TextBlock Text="Amount of bank funds" Foreground="White" FontWeight="Bold"/>
+            </Border>
+        </Canvas>
     </Grid>
 </Window>

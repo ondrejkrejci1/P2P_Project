@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using Serilog;
+using System.Net;
 using System.Net.Sockets;
 using System.Windows;
 using System.Windows.Controls;
@@ -16,11 +17,14 @@ namespace P2P_Project.Presentation_layer
         private int _port;
         private int _timeoutTime;
 
-        private StackPanel _errorPanel;
-        private StackPanel _clientPanel;
-        private TextBlock _clientCounter;
+        private int _clientCounter = 0;
 
-        public ClientListener(string ipAddress, int port, int _timeoutTime, StackPanel errorPanel, StackPanel clientPanel, TextBlock clientCounter)
+        private StackPanel _clientPanel;
+        private TextBlock _clientCount;
+        private TextBlock _numberOfClients;
+        private TextBlock _bankAmount;
+
+        public ClientListener(string ipAddress, int port, int _timeoutTime, StackPanel clientPanel, TextBlock clientCounter, TextBlock numberOfClients, TextBlock bankAmount)
         {
             _listener = new TcpListener(IPAddress.Parse(ipAddress), port);
             _clients = new List<TcpConnection>();
@@ -28,9 +32,10 @@ namespace P2P_Project.Presentation_layer
             _port = port;
             this._timeoutTime = _timeoutTime;
 
-            _errorPanel = errorPanel;
             _clientPanel = clientPanel;
-            _clientCounter = clientCounter;
+            _clientCount = clientCounter;
+            _numberOfClients = numberOfClients;
+            _bankAmount = bankAmount;
             _clientAcceptor = new Thread(AcceptClient);
         }
 
@@ -52,25 +57,27 @@ namespace P2P_Project.Presentation_layer
 
                     ConfigureKeepAlive(client.Client);
 
-                    TcpConnection connection = new TcpConnection(client, this, _errorPanel, _clientPanel, _clientCounter);
+                    TcpConnection connection = new TcpConnection(client, this, _clientPanel, _clientCount, _numberOfClients, _bankAmount);
                     _clients.Add(connection);
                     connection.Start();
 
                     DisplayClient(client.Client);
+                    Log.Debug($"Client connected - {client.Client.RemoteEndPoint.ToString()}");
 
                 }
                 catch (SocketException socketEx)
                 {
+                    Log.Error($"Socket - {socketEx.Message}");
+
                     if (!_isRunning)
                     {
                         return;
                     }
 
-                    ErrorLog("Socket", socketEx.Message);
                 }
                 catch (Exception ex)
                 {
-                    ErrorLog("General", ex.Message);
+                    Log.Error($"General - {ex.Message}");
                 }
 
             }
@@ -84,32 +91,20 @@ namespace P2P_Project.Presentation_layer
             socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveRetryCount, 3);
         }
 
-        private void ErrorLog(string erronName, string errorMessage)
-        {
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                TextBlock errorText = new TextBlock
-                {
-                    Text = $"{erronName} error (Client Listener): {errorMessage}",
-                    Foreground = System.Windows.Media.Brushes.Red,
-                    Margin = new Thickness(10, 5, 0, 0)
-                };
-                _errorPanel.Children.Add(errorText);
-            });
-        }
-
         private void DisplayClient(Socket socket)
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
 
-                int displyedCount = int.Parse(_clientCounter.Text);
+                int displyedCount = int.Parse(_clientCount.Text);
                 displyedCount++;
-                _clientCounter.Text = displyedCount.ToString();
+                _clientCount.Text = displyedCount.ToString();
+
+                _clientCounter++;
 
                 TextBlock client = new TextBlock
                 {
-                    Text = $"{displyedCount} - Client: {socket.RemoteEndPoint.ToString()}",
+                    Text = $"{_clientCounter} - Client: {socket.RemoteEndPoint.ToString()}",
                     Margin = new Thickness(10, 5, 0, 0),
                     Tag = socket.RemoteEndPoint.ToString()
                 };
@@ -142,9 +137,9 @@ namespace P2P_Project.Presentation_layer
 
                 Application.Current.Dispatcher.Invoke(() =>
                 {
-                    int displyedCount = int.Parse(_clientCounter.Text);
+                    int displyedCount = int.Parse(_clientCount.Text);
                     displyedCount--;
-                    _clientCounter.Text = displyedCount.ToString();
+                    _clientCount.Text = displyedCount.ToString();
 
                     TextBlock[] clientTextboxes = _clientPanel.Children.OfType<TextBlock>().ToArray();
 
@@ -157,6 +152,8 @@ namespace P2P_Project.Presentation_layer
                         }
                     }
                 });
+
+                Log.Debug($"Client disconected - {client.Client.Client.RemoteEndPoint.ToString()}");
             }
             catch (Exception ex)
             {

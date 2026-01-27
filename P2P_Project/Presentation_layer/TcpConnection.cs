@@ -1,6 +1,9 @@
 ﻿using P2P_Project.Application_layer;
+using P2P_Project.Data_access_layer;
+using Serilog;
 using System.IO;
 using System.Net.Sockets;
+using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -16,14 +19,15 @@ namespace P2P_Project.Presentation_layer
         private StreamReader _reader;
         private StreamWriter _writer;
 
-        private StackPanel _errorPanel;
         private StackPanel _clientPanel;
         private TextBlock _clientCounter;
+        private TextBlock _numberOfClients;
+        private TextBlock _bankAmount;
 
         private CommandParser _commandParser;
         private CommandExecutor _commandExecutor;
 
-        public TcpConnection(TcpClient client, ClientListener listener, StackPanel errorPanel, StackPanel clientPanel, TextBlock clientCounter)
+        public TcpConnection(TcpClient client, ClientListener listener, StackPanel clientPanel, TextBlock clientCounter, TextBlock numberOfClients, TextBlock bankAmount)
         {
             _commandParser = new CommandParser();
             _commandExecutor = new CommandExecutor();
@@ -32,9 +36,10 @@ namespace P2P_Project.Presentation_layer
             _reader = new StreamReader(Client.GetStream());
             _writer = new StreamWriter(Client.GetStream()) { AutoFlush = true };
             _isRunning = true;
-            _errorPanel = errorPanel;
             _clientPanel = clientPanel;
             _clientCounter = clientCounter;
+            _numberOfClients = numberOfClients;
+            _bankAmount = bankAmount;
 
             _clientThread = new Thread(Run);
         }
@@ -57,7 +62,7 @@ namespace P2P_Project.Presentation_layer
             }
             catch (Exception ex)
             {
-                ErrorLog("RunLoop", ex.Message);
+                Log.Error($"RunLoop - {ex.Message}");
             }
             finally
             {
@@ -83,6 +88,14 @@ namespace P2P_Project.Presentation_layer
 
                 _commandExecutor.ExecuteCommand(Client, parsedCommand);
 
+                if (parsedCommand[0] == "AC" || parsedCommand[0] == "AR")
+                {
+                    LoadNumberOfClients();
+                }
+                else if(parsedCommand[0] == "AD" || parsedCommand[0] == "AW")
+                {
+                    LoadBankAmount();
+                }
             }
             catch (IOException)
             {
@@ -91,19 +104,18 @@ namespace P2P_Project.Presentation_layer
                     return;
                 }
 
-                ErrorLog("Communication", "Connection unexpectedly terminated.");
+                Log.Error($"Communication: Connection unexpectedly terminated.");
                 _isRunning = false;
             }
             catch (Exception ex)
             {
-                ErrorLog("Communication", ex.Message);
+                Log.Error($"Communication {ex.Message}");
             }
 
         }
 
         public void Stop()
         {
-            // poslani erroru uzivatelum o necekane chybe serveru
 
             _isRunning = false;
             if (_clientThread != null )
@@ -111,21 +123,90 @@ namespace P2P_Project.Presentation_layer
             Client.Close();
         }
 
-        private void ErrorLog(string erronName, string errorMessage)
+        private void LoadNumberOfClients()
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
-                TextBlock errorText = new TextBlock
+                try
                 {
-                    Text = $"{erronName} error (Client Connection): {errorMessage}",
-                    Foreground = System.Windows.Media.Brushes.Red,
-                    Margin = new Thickness(10,5,0,0)
+                    if (!File.Exists("accounts.json")) _numberOfClients.Text = "0";
 
-                };
-                _errorPanel.Children.Add(errorText);
+                    string jsonString = File.ReadAllText("accounts.json");
+
+                    if (string.IsNullOrWhiteSpace(jsonString)) _numberOfClients.Text = "0";
+
+                    using (JsonDocument doc = JsonDocument.Parse(jsonString))
+                    {
+                        if (doc.RootElement.ValueKind == JsonValueKind.Array)
+                        {
+                            _numberOfClients.Text = doc.RootElement.GetArrayLength().ToString();
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Error($"Error loading number of clients: {ex.Message}");
+                }
             });
         }
 
+        private void LoadBankAmount()
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                decimal totalSum = 0;
+
+                try
+                {
+                    if (!File.Exists("accounts.json")) return;
+
+                    string jsonString = File.ReadAllText("accounts.json");
+
+                    if (string.IsNullOrWhiteSpace(jsonString)) return;
+
+                    using (JsonDocument doc = JsonDocument.Parse(jsonString))
+                    {
+                        if (doc.RootElement.ValueKind == JsonValueKind.Array)
+                        {
+                            foreach (JsonElement element in doc.RootElement.EnumerateArray())
+                            {
+                                if (element.TryGetProperty("Balance", out JsonElement balanceElement))
+                                {
+                                    totalSum += balanceElement.GetDecimal();
+                                }
+                            }
+                        }
+                    }
+
+                    _bankAmount.Text = totalSum.ToString();
+                }
+                catch (Exception ex)
+                {
+                    Log.Error($"Error loading bank amount: {ex.Message}");
+                }
+
+                FormatBankAmount();
+            });
+        }
+
+        private void FormatBankAmount()
+        {
+            int pocetCifer = _bankAmount.Text.Length;
+
+            if (pocetCifer <= 3) _bankAmount.FontSize = 50;
+            else if (pocetCifer == 4) _bankAmount.FontSize = 38;
+            else if (pocetCifer == 5) _bankAmount.FontSize = 30;
+            else if (pocetCifer == 6) _bankAmount.FontSize = 24;
+            else if (pocetCifer == 7) _bankAmount.FontSize = 22;
+            else if (pocetCifer == 8) _bankAmount.FontSize = 18;
+            else if (pocetCifer == 9) _bankAmount.FontSize = 16;
+            else if (pocetCifer == 10) _bankAmount.FontSize = 14;
+            else
+            {
+                _bankAmount.FontSize = 14;
+                _bankAmount.TextWrapping = TextWrapping.NoWrap;
+            }
+        }
 
     }
 }
