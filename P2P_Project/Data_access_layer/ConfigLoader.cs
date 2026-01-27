@@ -4,9 +4,18 @@ using System.Text.Json;
 
 namespace P2P_Project.Data_access_layer
 {
+    /// <summary>
+    /// centralized configuration manager for the application.
+    /// Implements the Singleton pattern to ensure global access to immutable settings loaded from disk.
+    /// Responsible for validating network parameters (IPs, Ports) upon loading.
+    /// </summary>
     public class ConfigLoader
     {
         private static readonly ConfigLoader _instance = new ConfigLoader();
+
+        /// <summary>
+        /// Gets the single, globally accessible instance of the <see cref="ConfigLoader"/>.
+        /// </summary>
         public static ConfigLoader Instance => _instance;
 
         private readonly string ConfigFilePath = Path.Combine("config", "config.json");
@@ -20,17 +29,46 @@ namespace P2P_Project.Data_access_layer
         private int _scanPortStart;
         private int _scanPortEnd;
 
+        /// <summary>
+        /// Private constructor to enforce the Singleton pattern.
+        /// Triggers the loading of configuration data immediately upon instantiation.
+        /// </summary>
         private ConfigLoader()
         {
             LoadConfig();
         }
 
+        /// <summary>
+        /// Gets the local IP address this server is bound to.
+        /// </summary>
+        /// <exception cref="ArgumentException">Thrown if the IP format is invalid.</exception>
         public string IPAddress { get => _ipAddress; private set => _ipAddress = ValidateIp(value); }
+
+        /// <summary>
+        /// Gets the port number this server listens on.
+        /// </summary>
+        /// <exception cref="ArgumentException">Thrown if the port is outside the allowed range (1024-65535).</exception>
         public int AppPort { get => _appPort; private set => _appPort = ValidatePort(value); }
+
+        /// <summary>
+        /// Gets the timeout duration (in milliseconds) for network operations.
+        /// </summary>
         public int TimeoutTime { get => _timeoutTime; private set => _timeoutTime = value > 0 ? value : throw new ArgumentException("ER TimeoutTime must be a number greater than 0"); }
+
+        /// <summary>
+        /// Gets the maximum number of concurrent client connections allowed.
+        /// </summary>
         public int MaxConnectionCount { get => _maxConnectionCount; private set => _maxConnectionCount = value > 0 ? value : throw new ArgumentException("ER MaxConnectionCount must be a number greater than 0"); }
 
+        /// <summary>
+        /// Gets the starting IP address for the network discovery scan range.
+        /// </summary>
         public string ScanIpStart { get => _scanIpStart; private set => _scanIpStart = ValidateIp(value); }
+
+        /// <summary>
+        /// Gets the ending IP address for the network discovery scan range.
+        /// Must be numerically greater than or equal to <see cref="ScanIpStart"/>.
+        /// </summary>
         public string ScanIpEnd
         {
             get => _scanIpEnd;
@@ -42,7 +80,15 @@ namespace P2P_Project.Data_access_layer
             }
         }
 
+        /// <summary>
+        /// Gets the starting port number for the network discovery scan range.
+        /// </summary>
         public int ScanPortStart { get => _scanPortStart; private set => _scanPortStart = ValidatePort(value); }
+
+        /// <summary>
+        /// Gets the ending port number for the network discovery scan range.
+        /// Must be greater than or equal to <see cref="ScanPortStart"/>.
+        /// </summary>
         public int ScanPortEnd
         {
             get => _scanPortEnd;
@@ -54,6 +100,11 @@ namespace P2P_Project.Data_access_layer
             }
         }
 
+        /// <summary>
+        /// Reads and parses the 'config.json' file.
+        /// Populates the class properties with values from the JSON document.
+        /// </summary>
+        /// <exception cref="Exception">Thrown if the file is missing or the configuration is invalid.</exception>
         private void LoadConfig()
         {
             try
@@ -82,6 +133,12 @@ namespace P2P_Project.Data_access_layer
             }
         }
 
+        /// <summary>
+        /// Validates that a string is a correctly formatted IPv4 address.
+        /// </summary>
+        /// <param name="ip">The IP string to check.</param>
+        /// <returns>The valid IP string.</returns>
+        /// <exception cref="ArgumentException">Thrown if the format is incorrect or segments are out of range.</exception>
         private string ValidateIp(string ip)
         {
             if (string.IsNullOrWhiteSpace(ip)) throw new ArgumentException("Invalid IP address");
@@ -95,6 +152,12 @@ namespace P2P_Project.Data_access_layer
             return ip;
         }
 
+        /// <summary>
+        /// Validates that a port number is within the allowable range (1024 - 65535).
+        /// </summary>
+        /// <param name="port">The port number to check.</param>
+        /// <returns>The valid port number.</returns>
+        /// <exception cref="ArgumentException">Thrown if the port is reserved or out of range.</exception>
         private int ValidatePort(int port)
         {
             if (port < 1024 || port > 65535)
@@ -102,6 +165,12 @@ namespace P2P_Project.Data_access_layer
             return port;
         }
 
+        /// <summary>
+        /// Converts an IPv4 string into a long integer for numerical comparison.
+        /// Used to ensure the Start IP is lower than the End IP.
+        /// </summary>
+        /// <param name="ip">The IP address string.</param>
+        /// <returns>The numeric representation of the IP.</returns>
         private long ConvertIpToNumber(string ip)
         {
             string[] s = ip.Split('.');
