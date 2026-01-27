@@ -48,24 +48,25 @@ namespace P2P_Project.Presentation_layer
 
         private void Run()
         {
+            Log.Debug("Connection thread started for client.");
             try
             {
                 do
                 {
                     Do();
-                } 
+                }
                 while (_isRunning);
             }
             catch (Exception ex)
             {
-                Log.Error($"ER: {ex.Message}");
+                Log.Error(ex, "Critical failure in TcpConnection.Run loop.");
             }
             finally
             {
+                Log.Debug("Closing client connection and stopping thread.");
                 _clientListener.ClientDisconected(this);
                 Stop();
             }
-
         }
 
         private void Do()
@@ -73,33 +74,26 @@ namespace P2P_Project.Presentation_layer
             try
             {
                 string clientInput = _reader.ReadLine();
-
                 if (clientInput == null)
                 {
+                    Log.Debug("Client closed the stream (received null).");
                     _isRunning = false;
                     return;
                 }
 
+                Log.Debug("Received raw input: {Input}", clientInput);
                 string[] parsedCommand = _commandParser.Parse(clientInput);
-
                 _commandExecutor.ExecuteCommand(Client, parsedCommand);
-
             }
             catch (IOException ex)
             {
-                if (!_isRunning)
-                {
-                    return;
-                }
-
-                Log.Error($"ER: {ex.Message}");
+                Log.Warning("Network connection reset by peer.");
                 _isRunning = false;
             }
             catch (Exception ex)
             {
-                Log.Error($"ER: {ex.Message}");
+                Log.Error(ex, "Unexpected error during command processing.");
             }
-
         }
 
         public void Stop()

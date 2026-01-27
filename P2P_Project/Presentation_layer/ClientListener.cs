@@ -37,9 +37,17 @@ namespace P2P_Project.Presentation_layer
 
         public void Start()
         {
-            _listener.Start();
-            _isRunning = true;
-            _clientAcceptor.Start();
+            try
+            {
+                _listener.Start();
+                _isRunning = true;
+                _clientAcceptor.Start();
+                Log.Information("Server started on {IP}:{Port}", _ipAddress, _port);
+            }
+            catch (Exception ex)
+            {
+                Log.Fatal(ex, "Failed to start TcpListener.");
+            }
         }
 
 
@@ -52,6 +60,7 @@ namespace P2P_Project.Presentation_layer
                 try
                 {
                     TcpClient client = _listener.AcceptTcpClient();
+                    Log.Debug("Accepted new client from {RemoteEndPoint}", client.Client.RemoteEndPoint);
                     TcpConnection connection = new TcpConnection(client, this, _errorPanel, _clientPanel, _clientCounter);
 
                     lock (_listLock) { _clients.Add(connection); }
@@ -61,6 +70,7 @@ namespace P2P_Project.Presentation_layer
                 catch (SocketException socketEx)
                 {
                     if (!_isRunning) return;
+                    Log.Error(socketEx, "Socket error during client acceptance.");
                     if (socketEx.SocketErrorCode == SocketError.NetworkUnreachable)
                     {
                         Log.Error($"Network connection lost: {socketEx.Message}");
