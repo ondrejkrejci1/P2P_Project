@@ -53,6 +53,7 @@ namespace P2P_Project
             CreateLogger();
 
             InitializeComponent();
+
             _clientListener = new ClientListener(ConfigLoader.Instance.IPAddress, ConfigLoader.Instance.AppPort, ConfigLoader.Instance.TimeoutTime, ErrorPanel, ClientPanel, ClientCounter);
             _clientListener.Start();
         }
