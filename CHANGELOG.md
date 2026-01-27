@@ -28,6 +28,9 @@
 
 #### Krejčí
 
+- Created UI
+- Activated the logger visualization
+
 ## 23.1.2025
 
 ### Added
