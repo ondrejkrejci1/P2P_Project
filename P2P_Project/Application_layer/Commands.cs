@@ -46,7 +46,7 @@ namespace P2P_Project.Application_layer
             {
                 if (args.Length < 3 ||
                     !TryParseAccountArg(args[1], out int accountNumber, out string ip) ||
-                    !double.TryParse(args[2], out double amount))
+                    !long.TryParse(args[2], out long amount))
                 {
                     ConnectionManager.Instance.SendMessage(client, "ER AD Failed: Invalid arguments");
                     return;
@@ -63,7 +63,7 @@ namespace P2P_Project.Application_layer
             {
                 if (args.Length < 3 ||
                     !TryParseAccountArg(args[1], out int accountNumber, out string ip) ||
-                    !double.TryParse(args[2], out double amount))
+                    !long.TryParse(args[2], out long amount))
                 {
                     ConnectionManager.Instance.SendMessage(client, "ER AW Failed: Invalid arguments");
                     return;
@@ -121,6 +121,14 @@ namespace P2P_Project.Application_layer
             {
                 string result = BankingManager.Instance.GetClientCount();
                 ConnectionManager.Instance.SendMessage(client, result);
+            }
+        }
+
+        public class RobberyPlan : IBankCommand
+        {
+            public void Execute(TcpClient client, string[] args)
+            {
+
             }
         }
     }
