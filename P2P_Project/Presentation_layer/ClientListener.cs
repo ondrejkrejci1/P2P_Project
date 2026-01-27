@@ -134,27 +134,34 @@ namespace P2P_Project.Presentation_layer
 
         public void ClientDisconected(TcpConnection client)
         {
-            if (!_clients.Contains(client)) return;
-
-            _clients.Remove(client);
-
-            Application.Current.Dispatcher.Invoke(() =>
+            try
             {
-                int displyedCount = int.Parse(_clientCounter.Text);
-                displyedCount--;
-                _clientCounter.Text = displyedCount.ToString();
+                if (!_clients.Contains(client)) return;
 
-                TextBlock[] clientTextboxes = _clientPanel.Children.OfType<TextBlock>().ToArray();
+                _clients.Remove(client);
 
-                foreach (var item in clientTextboxes)
+                Application.Current.Dispatcher.Invoke(() =>
                 {
-                    if (item.Tag.ToString() == client.Client.Client.RemoteEndPoint.ToString())
+                    int displyedCount = int.Parse(_clientCounter.Text);
+                    displyedCount--;
+                    _clientCounter.Text = displyedCount.ToString();
+
+                    TextBlock[] clientTextboxes = _clientPanel.Children.OfType<TextBlock>().ToArray();
+
+                    foreach (var item in clientTextboxes)
                     {
-                        _clientPanel.Children.Remove(item);
-                        break;
+                        if (item.Tag.ToString() == client.Client.Client.RemoteEndPoint.ToString())
+                        {
+                            _clientPanel.Children.Remove(item);
+                            break;
+                        }
                     }
-                }
-            });
+                });
+            }
+            catch (Exception ex)
+            {
+
+            }
         }
 
     }

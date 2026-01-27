@@ -18,7 +18,8 @@ namespace P2P_Project.Application_layer
             ["AB"] = new AccountBalance().Execute,
             ["AR"] = new AccountRemove().Execute,
             ["BA"] = new BankTotalAmounth().Execute,
-            ["BN"] = new BankClients().Execute
+            ["BN"] = new BankClients().Execute,
+            ["RP"] = new BankRobbery().Execute
         };
 
         public void ExecuteCommand(TcpClient client, string[] parsedInput)
