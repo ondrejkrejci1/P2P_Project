@@ -34,7 +34,7 @@ namespace P2P_Project.Data_access_layer
                 }
                 while (_accounts.Any(a => a.AccountNumber == newAccountNumber));
 
-                var account = new BankAccount(newAccountNumber, 0.0f);
+                var account = new BankAccount(newAccountNumber, 0);
                 _accounts.Add(account);
                 SaveAccounts();
 

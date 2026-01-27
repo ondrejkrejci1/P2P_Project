@@ -40,7 +40,7 @@ namespace P2P_Project.Application_layer
                         writer.WriteLine("BC");
                         string response = reader.ReadLine();
 
-                        if (!CorrectAnswer(response))
+                        if (CorrectAnswer(response) == true)
                         {
                             connection.Close();
                         }
@@ -108,7 +108,7 @@ namespace P2P_Project.Application_layer
 
             try
             {
-                if (parts[0] == "BC" && parts[1] == _ipAddress.ToString())
+                if (parts[0] == "BC" && IPAddress.Parse(parts[1]) == _ipAddress)
                 {
                     return true;
                 }
@@ -129,10 +129,10 @@ namespace P2P_Project.Application_layer
         {
             if (Port == 0)
             {
-                return $"ER Unable to connect to {_ipAddress}: No open port found";
+                return $"ER Unable to connect to {_ipAddress}. No open port found";
             }
 
-            string response = "";
+            string response = "ER bank was unable to process the request";
 
             try
             {
