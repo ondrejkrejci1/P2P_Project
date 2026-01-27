@@ -22,7 +22,7 @@ namespace P2P_Project.Application_layer
         /// </summary>
         public static RobberyPlanner Instance => _instance;
 
-        private readonly NetworkScanner _scanner;
+        private readonly NetworkScanner _networkScanner;
 
         /// <summary>
         /// Private constructor to enforce the Singleton pattern.
@@ -30,25 +30,76 @@ namespace P2P_Project.Application_layer
         /// </summary>
         private RobberyPlanner()
         {
-            _scanner = new NetworkScanner();
+            _networkScanner = new NetworkScanner();
         }
 
         /// <summary>
         /// Orchestrates the entire robbery planning process: scanning, data collection, and path calculation.
         /// </summary>
-        /// <param name="targetAmount">The total amount of money the user wishes to "steal".</param>
+        /// <param name="targetMoneyAmount">The total amount of money the user wishes to "steal".</param>
         /// <returns>A string describing the plan (list of banks to rob) or an error message if the amount is unreachable.</returns>
-        public async Task<string> ExecuteRobberyPlan(long targetAmount)
+        public async Task<string> ExecuteRobberyPlan(long targetMoneyAmount)
         {
-            var networkData = await CollectNetworkData();
+            var availableBankNodes = await CollectNetworkData();
 
-            if (networkData.Length == 0)
+            if (availableBankNodes.Length == 0)
             {
                 return "ER no other bank nodes were found";
             }
 
-            var optimalPath = GetOptimalRobberyPath(networkData);
-            return GeneratePlanResponse(optimalPath, targetAmount);
+            return CalculateOptimalKnapsackPlan(availableBankNodes, targetMoneyAmount);
+        }
+
+        /// <summary>
+        /// Calculates the optimal set of banks to rob using a sparse Dynamic Programming (Knapsack) approach.
+        /// Unlike a greedy sort, this method guarantees finding the minimum number of affected clients 
+        /// to reach the specific <paramref name="requiredMoneyGoal"/>.
+        /// </summary>
+        /// <param name="availableNodes">The list of valid bank nodes discovered in the network.</param>
+        /// <param name="requiredMoneyGoal">The target amount of money to acquire.</param>
+        /// <returns>A formatted protocol string starting with "RP", or an error if funds are insufficient.</returns>
+        private string CalculateOptimalKnapsackPlan(BankNodeData[] availableNodes, long requiredMoneyGoal)
+        {
+            // Dictionary: Klíč = součet klientů (váha), Hodnota = (dosažené peníze, seznam IP adres bank)
+            // Uses a sparse approach (Dictionary) to only track reachable client counts, avoiding large array allocations.
+            var possibleRobberyStates = new Dictionary<int, (long TotalMoney, List<string> BankIpList)>();
+
+            // Výchozí stav: 0 klientů a 0 peněz
+            possibleRobberyStates[0] = (0, new List<string>());
+
+            foreach (var currentNode in availableNodes)
+            {
+                // Vytvoříme kopii aktuálních stavů pro bezpečnou iteraci a přidání nové banky
+                var existingCombinations = possibleRobberyStates.ToList();
+
+                foreach (var state in existingCombinations)
+                {
+                    int combinedClientCount = state.Key + (int)currentNode.Clients;
+                    long combinedMoneyAmount = state.Value.TotalMoney + currentNode.Amount;
+
+                    // Pokud tato kombinace počtu klientů neexistuje, nebo nabízí více peněz než předchozí známá cesta
+                    // Update state if we found a new reachable client count OR a richer path to an existing count
+                    if (!possibleRobberyStates.ContainsKey(combinedClientCount) ||
+                        possibleRobberyStates[combinedClientCount].TotalMoney < combinedMoneyAmount)
+                    {
+                        var updatedBankIpList = new List<string>(state.Value.BankIpList) { currentNode.Ip };
+                        possibleRobberyStates[combinedClientCount] = (combinedMoneyAmount, updatedBankIpList);
+                    }
+                }
+            }
+
+            var bestFoundOption = possibleRobberyStates
+                .Where(option => option.Value.TotalMoney >= requiredMoneyGoal)
+                .OrderBy(option => option.Key)
+                .ThenByDescending(option => option.Value.TotalMoney)
+                .FirstOrDefault();
+
+            if (bestFoundOption.Value.BankIpList == null)
+            {
+                return "RP Plan will fail: Insufficient funds in the network";
+            }
+
+            return $"RP K dosazeni {requiredMoneyGoal} je treba vyloupit banky {string.Join(", ", bestFoundOption.Value.BankIpList)} a bude poskozeno jen {bestFoundOption.Key} klientu.";
         }
 
         /// <summary>
@@ -58,114 +109,70 @@ namespace P2P_Project.Application_layer
         /// <returns>An array of valid <see cref="BankNodeData"/> objects containing IP, total wealth, and client counts.</returns>
         private async Task<BankNodeData[]> CollectNetworkData()
         {
-            var activeIps = await _scanner.ScanNetworkAsync();
-            var nodes = new List<BankNodeData>();
+            var discoveredActiveIps = await _networkScanner.ScanNetworkAsync();
+            var validBankNodes = new List<BankNodeData>();
 
-            foreach (string ip in activeIps)
+            foreach (string remoteIp in discoveredActiveIps)
             {
-                if (ip == ConfigLoader.Instance.IPAddress) continue;
+                if (remoteIp == ConfigLoader.Instance.IPAddress) continue;
 
-                var stats = GetBankStats(ip);
+                var remoteBankStats = GetRemoteBankStats(remoteIp);
 
-                if (stats.Amount >= 0 && stats.Clients >= 0)
+                if (remoteBankStats.Amount > 0 && remoteBankStats.Clients >= 0)
                 {
-                    nodes.Add(stats);
+                    validBankNodes.Add(remoteBankStats);
                 }
             }
 
-            return nodes.ToArray();
+            return validBankNodes.ToArray();
         }
 
         /// <summary>
         /// Connects to a specific remote IP using a ProxyClient to request its "BA" (Bank Amount) and "BN" (Bank Number of clients).
         /// </summary>
-        /// <param name="ip">The IP address of the target bank node.</param>
-        /// <returns>A data object containing the parsed stats for that node.</returns>
-        private BankNodeData GetBankStats(string ip)
+        /// <param name="ipAddress">The IP address of the target bank node.</param>
+        /// <returns>A data object containing the parsed stats for that node, or -1 values on failure.</returns>
+        private BankNodeData GetRemoteBankStats(string ipAddress)
         {
-            ProxyClient proxy = new ProxyClient(IPAddress.Parse(ip));
-
-            string totalAmountResponse = proxy.ForwardRequest("BA");
-            string clientCountResponse = proxy.ForwardRequest("BN");
-
-            return new BankNodeData(
-                ip,
-                ParseAmount(totalAmountResponse),
-                ParseClients(clientCountResponse)
-            );
-        }
-
-        /// <summary>
-        /// Sorts the list of available banks to determine the most efficient robbery targets.
-        /// The sorting logic relies on the 'AverageWealth' property (Amount / Clients) to maximize return per victim.
-        /// </summary>
-        /// <param name="networkData">The raw list of gathered bank data.</param>
-        /// <returns>The array sorted by desirability (highest average wealth first).</returns>
-        private BankNodeData[] GetOptimalRobberyPath(BankNodeData[] networkData)
-        {
-            Array.Sort(networkData, (a, b) => b.AverageWealth.CompareTo(a.AverageWealth));
-            return networkData;
-        }
-
-        /// <summary>
-        /// Constructs the final result string by iterating through the sorted bank list 
-        /// until the cumulative stolen amount meets or exceeds the target.
-        /// </summary>
-        /// <param name="optimalPath">The sorted list of target banks.</param>
-        /// <param name="targetAmount">The goal amount.</param>
-        /// <returns>A formatted protocol string starting with "RP", or an error if funds are insufficient.</returns>
-        private string GeneratePlanResponse(BankNodeData[] optimalPath, long targetAmount)
-        {
-            long currentTotal = 0;
-            long totalClientsAffected = 0;
-            var targetBanks = new List<string>();
-
-            foreach (var node in optimalPath)
-            {
-                if (currentTotal >= targetAmount) break;
-
-                currentTotal += node.Amount;
-                totalClientsAffected += node.Clients;
-                targetBanks.Add(node.Ip);
-            }
-
-            if (currentTotal < targetAmount)
-            {
-                return "RP Plan will fail: Insufficient funds in the network";
-            }
-
-            return $"RP To obtain {targetAmount} you will need to rob {string.Join(", ", targetBanks)} affecting {totalClientsAffected} clients.";
-        }
-
-        /// <summary>
-        /// Parses the "BA {amount}" response string.
-        /// </summary>
-        /// <returns>The amount as a long, or -1 if parsing fails.</returns>
-        private long ParseAmount(string response)
-        {
-            if (string.IsNullOrEmpty(response) || response.StartsWith("ER")) return -1;
             try
             {
-                string[] parts = response.Split(' ');
-                if (parts.Length == 2 && parts[0] == "BA") return long.Parse(parts[1]);
+                ProxyClient proxyConnection = new ProxyClient(IPAddress.Parse(ipAddress));
+
+                string amountResponse = proxyConnection.ForwardRequest("BA");
+                string clientsResponse = proxyConnection.ForwardRequest("BN");
+
+                return new BankNodeData(
+                    ipAddress,
+                    ExtractValueFromResponse(amountResponse, "BA"),
+                    ExtractValueFromResponse(clientsResponse, "BN")
+                );
             }
-            catch { }
-            return -1;
+            catch
+            {
+                return new BankNodeData(ipAddress, -1, -1);
+            }
         }
 
         /// <summary>
-        /// Parses the "BN {count}" response string.
+        /// Parses a protocol response string (e.g., "BA 1000" or "BN 5") to extract the numeric value.
         /// </summary>
-        /// <returns>The client count as a long, or -1 if parsing fails.</returns>
-        private long ParseClients(string response)
+        /// <param name="protocolResponse">The raw response string from the remote server.</param>
+        /// <param name="expectedPrefix">The expected protocol prefix (e.g., "BA" or "BN").</param>
+        /// <returns>The parsed long value, or -1 if the response is invalid or an error.</returns>
+        private long ExtractValueFromResponse(string protocolResponse, string expectedPrefix)
         {
-            if (string.IsNullOrEmpty(response) || response.StartsWith("ER")) return -1;
+            if (string.IsNullOrEmpty(protocolResponse) || protocolResponse.StartsWith("ER")) return -1;
+
             try
             {
-                string[] parts = response.Split(' ');
-                if (parts.Length == 2 && parts[0] == "BN") return long.Parse(parts[1]);
+                string[] messageParts = protocolResponse.Split(' ');
+                if (messageParts.Length == 2 && messageParts[0] == expectedPrefix)
+                {
+                    return long.Parse(messageParts[1]);
+                }
             }
             catch { }
+
             return -1;
         }
     }
