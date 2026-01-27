@@ -174,11 +174,18 @@ namespace P2P_Project.Application_layer
             }
         }
 
-        public class RobberyPlan : IBankCommand
+        public class BankRobbery : IBankCommand
         {
-            public void Execute(TcpClient client, string[] args)
+            public async void Execute(TcpClient client, string[] args)
             {
+                if (args.Length < 2 || !long.TryParse(args[1], out long targetAmount))
+                {
+                    ConnectionManager.Instance.SendMessage(client, "ER RP Failed: Invalid target amount");
+                    return;
+                }
 
+                string result = await RobberyPlanner.Instance.ExecuteRobberyPlan(targetAmount);
+                ConnectionManager.Instance.SendMessage(client, result);
             }
         }
     }
