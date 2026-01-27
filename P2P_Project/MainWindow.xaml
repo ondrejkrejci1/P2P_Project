@@ -26,9 +26,9 @@
             <StackPanel Grid.Row="1"  Margin="15">
                 <TextBlock Text="Logs" FontWeight="Bold" Foreground="#232528" FontSize="28" HorizontalAlignment="Left"/>
 
-                <ScrollViewer Height="300" Width="360" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Left" VerticalAlignment="Top"  Background="#F7F7FF">
+                <ScrollViewer Height="300" Width="370" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Left" VerticalAlignment="Top"  Background="#F7F7FF">
 
-                    <StackPanel x:Name="LoggerPanel" Height="295" VerticalAlignment="Top"/>
+                    <StackPanel x:Name="LoggerPanel"/>
 
                 </ScrollViewer>
 
@@ -49,7 +49,7 @@
 
                 <ScrollViewer Height="150" Width="240" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="130,20,15,0" Background="#F7F7FF">
 
-                    <StackPanel x:Name="ClientPanel" Height="145" VerticalAlignment="Top"/>
+                    <StackPanel x:Name="ClientPanel"/>
 
                 </ScrollViewer>
 
@@ -58,7 +58,7 @@
 
                     <ScrollViewer Height="130" Width="370" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Left" VerticalAlignment="Top"  Background="#F7F7FF">
 
-                        <StackPanel x:Name="ErrorPanel" Height="125" VerticalAlignment="Top" />
+                        <StackPanel x:Name="ErrorPanel"/>
 
                     </ScrollViewer>
 
