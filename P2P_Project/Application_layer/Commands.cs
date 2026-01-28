@@ -86,7 +86,7 @@ namespace P2P_Project.Application_layer
             {
                 if (args.Length < 3 ||
                     !TryParseAccountArg(args[1], out int accountNumber, out string ip) ||
-                    !long.TryParse(args[2], out long amount))
+                    !long.TryParse(args[2], out long amount) || amount <= 0)
                 {
                     Log.Warning("AD Command rejected: Invalid arguments.");
                     ConnectionManager.Instance.SendMessage(client, "ER AD Failed: Invalid arguments");
@@ -126,7 +126,7 @@ namespace P2P_Project.Application_layer
             {
                 if (args.Length < 3 ||
                     !TryParseAccountArg(args[1], out int accountNumber, out string ip) ||
-                    !long.TryParse(args[2], out long amount))
+                    !long.TryParse(args[2], out long amount) || amount <= 0)
                 {
                     Log.Warning("AW Command rejected: Invalid arguments.");
                     ConnectionManager.Instance.SendMessage(client, "ER AW Failed: Invalid arguments");
