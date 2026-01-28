@@ -64,7 +64,6 @@ namespace P2P_Project.Application_layer
         {
             Log.Debug("Calculating optimal plan using {Count} available nodes.", availableNodes.Length);
 
-            // Key = client count (weight), Value = (money reached, list of bank IPs)
             var possibleRobberyStates = new Dictionary<int, (long TotalMoney, List<string> BankIpList)>();
             possibleRobberyStates[0] = (0, new List<string>());
 
@@ -124,8 +123,7 @@ namespace P2P_Project.Application_layer
                 }
                 else
                 {
-                    Log.Warning("Skipping node {Ip}: Invalid stats (Amount: {Amount}, Clients: {Clients})",
-                        remoteIp, remoteBankStats.Amount, remoteBankStats.Clients);
+                    Log.Warning("Skipping node {Ip}: Invalid stats (Amount: {Amount}, Clients: {Clients})", remoteIp, remoteBankStats.Amount, remoteBankStats.Clients);
                 }
             }
 
@@ -162,16 +160,16 @@ namespace P2P_Project.Application_layer
         /// <summary>
         /// Parses protocol response strings to extract numeric values.
         /// </summary>
-        /// <param name="protocolResponse">Raw response string.</param>
+        /// <param name="response">Raw response string.</param>
         /// <param name="expectedPrefix">Expected protocol prefix (e.g., "BA").</param>
         /// <returns>The parsed value or -1 if invalid.</returns>
-        private long ExtractValueFromResponse(string protocolResponse, string expectedPrefix)
+        private long ExtractValueFromResponse(string response, string expectedPrefix)
         {
-            if (string.IsNullOrEmpty(protocolResponse) || protocolResponse.StartsWith("ER")) return -1;
+            if (string.IsNullOrEmpty(response) || response.StartsWith("ER")) return -1;
 
             try
             {
-                string[] messageParts = protocolResponse.Split(' ');
+                string[] messageParts = response.Split(' ');
                 if (messageParts.Length == 2 && messageParts[0] == expectedPrefix)
                 {
                     return long.Parse(messageParts[1]);
@@ -179,7 +177,7 @@ namespace P2P_Project.Application_layer
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error parsing protocol response: {Response}", protocolResponse);
+                Log.Error(ex, "Error parsing protocol response: {Response}", response);
             }
 
             return -1;
