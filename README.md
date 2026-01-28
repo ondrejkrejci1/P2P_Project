@@ -45,7 +45,7 @@ The application uses `config/config.json` to manage node identity and network di
 | :--- | :--- | :--- |
 | **IPAddress** | string | Ipv4 address of the application. |
 | **Port** | int | The TCP port the node listens on. Must be between 1024 and 65535. |
-| **TimeoutTime** | int | Global timeout in milliseconds for network operations. Recommended: 200-500ms. |
+| **TimeoutTime** | int | Global timeout in milliseconds for network operations.|
 | **ScanIpRanges** | array | A list of IP ranges (Start/End) to scan for other peers. |
 | **ScanPortRanges** | array | A list of port ranges (Start/End) to scan for the bank node aplication. |
 
