@@ -16,14 +16,22 @@ This project implements a decentralized Peer-to-Peer (P2P) banking node. Each no
 * **Manual Control:** Compatible with **PuTTY** (Raw mode) or Telnet for manual command entry.
 
 ### How to Run
-The application is a console-based P2P node. To run it without an IDE:
+1. Click green button Code.
+2. Click Download ZIP.
+3. Find the location where the .zip folder was saved and extract it.
+4. Find the directory where the file with the .sln extension is located.
+5. Open the command prompt.
+6. Use the cd command to navigate to the directory containing the .sln file that you found earlier.
+7. Type the command: !dotnet build!.
+8. After completing the build, go to the file manager and navigate from the folder containing the .sln file to the P2P_Project -> bin -> Debug -> net8.0-windows folder.
+9. Create a new folder named config.
+10. Open the newly created folder.
+11. Create a new json file named config.json or download config.json file from github and copy it here.
+12. Edit the newly created file and insert the structure shown as !config.json structure!.
+13. Set the parameters according to your needs and save the changes.
+14. Find the .exe file in the folder named net8.0-windows, where you created the config folder, and run the file
 
-1. Open a terminal/command prompt in the project root.
-2. Run the following command:
-   ```bash
-   dotnet run --project P2P_Project.csproj
-   ```
-The application will start listening on the port defined in your `config.json` (within the range 65525–65535).
+TIPS: To run the application again, locate the .exe file in the familiar directory
 
 ---
 
@@ -92,3 +100,8 @@ All communication is text-based using **UTF-8** encoding.
 | **BA** | Bank Amount | Returns total funds held by this bank. | `BA` | `BA 500000` |
 | **BN** | Bank Number | Returns the total number of clients. | `BN` | `BN 12` |
 | **RP** | Robbery Plan | Calculates optimal heist strategy. | `RP 1000000` | `RP <details>` |
+
+## Resources
+Logger: https://gemini.google.com/share/e8b5e4283e8b
+Network scanner: https://gemini.google.com/share/8ffd2e52b7d0
+Robbery plan calculator: https://gemini.google.com/share/80308b14f362
