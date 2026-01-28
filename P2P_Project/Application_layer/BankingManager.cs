@@ -127,6 +127,10 @@ namespace P2P_Project.Application_layer
 
                 return $"AB {account.Balance}";
             }
+            catch (KeyNotFoundException)
+            {
+                return "ER AR Failed: Account not found";
+            }
             catch
             {
                 return "ER Internal server error";
@@ -154,6 +158,10 @@ namespace P2P_Project.Application_layer
 
                 _repository.DeleteAccount(accountNumber);
                 return "AR";
+            }
+            catch (KeyNotFoundException)
+            {
+                return "ER AR Failed: Account not found";
             }
             catch
             {
