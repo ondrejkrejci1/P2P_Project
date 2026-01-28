@@ -64,7 +64,6 @@ namespace P2P_Project.Application_layer
         {
             Log.Debug("Calculating optimal plan using {Count} available nodes.", availableNodes.Length);
 
-            // Key = client count (weight), Value = (money reached, list of bank IPs)
             var possibleRobberyStates = new Dictionary<int, (long TotalMoney, List<string> BankIpList)>();
             possibleRobberyStates[0] = (0, new List<string>());
 
