@@ -3,6 +3,7 @@ using P2P_Project.Data_access_layer;
 using Serilog;
 using System.IO;
 using System.Net.Sockets;
+using System.Text;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
@@ -31,11 +32,14 @@ namespace P2P_Project.Presentation_layer
         {
             _commandParser = new CommandParser();
             _commandExecutor = new CommandExecutor();
+
             Client = client;
             _clientListener = listener;
             _reader = new StreamReader(Client.GetStream());
             _writer = new StreamWriter(Client.GetStream()) { AutoFlush = true };
+
             _isRunning = true;
+
             _clientPanel = clientPanel;
             _clientCounter = clientCounter;
             _numberOfClients = numberOfClients;
@@ -121,8 +125,6 @@ namespace P2P_Project.Presentation_layer
             _isRunning = false;
 
             try
-
-
             {
                 _reader?.Close();
                 _writer?.Close();
@@ -218,6 +220,12 @@ namespace P2P_Project.Presentation_layer
                 _bankAmount.FontSize = 14;
                 _bankAmount.TextWrapping = TextWrapping.NoWrap;
             }
+        }
+
+        public void SendMessageCapacityFull()
+        {
+            byte[] data = Encoding.UTF8.GetBytes("The maximum number of clients allowed by the bank is connected to the bank. Please try connecting later." + Environment.NewLine);
+            Client.GetStream().Write(data, 0, data.Length);
         }
 
     }

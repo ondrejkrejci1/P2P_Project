@@ -30,8 +30,8 @@ namespace P2P_Project
                         TextBlock loggerText = new TextBlock
                         {
                             Text = $"[{evt.Level}] {evt.RenderMessage()}",
-                            Margin = new Thickness(10, 5, 0, 0)
-
+                            Margin = new Thickness(10, 5, 5, 0),
+                            TextWrapping = TextWrapping.Wrap
                         };
                         LoggerPanel.Children.Add(loggerText);
                     });

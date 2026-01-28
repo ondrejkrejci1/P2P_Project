@@ -69,10 +69,34 @@ namespace P2P_Project.Presentation_layer
                     ConfigureKeepAlive(client.Client);
 
                     TcpConnection connection = new TcpConnection(client, this, _clientPanel, _clientCount, _numberOfClients, _bankAmount);
-                    _clients.Add(connection);
-                    connection.Start();
-                    DisplayClient(client.Client);
-                    Log.Debug($"Client connected - {client.Client.RemoteEndPoint.ToString()}");
+
+                    if (_clients.Count >= ConfigLoader.Instance.MaxConnectionCount)
+                    {
+                        connection.SendMessageCapacityFull();
+                        Log.Debug($"Client ({client.Client.RemoteEndPoint.ToString()}) - attempted to connect, but the connection was rejected because the bank's maximum capacity was exceeded.");
+                        Task.Run(async () =>
+                        {
+                            try
+                            {
+                                await Task.Delay(5000);
+                            }
+                            catch (Exception e)
+                            {
+
+                            }
+                            finally
+                            {
+                                connection.Stop();
+                            }
+                        });
+                    }
+                    else
+                    {
+                        _clients.Add(connection);
+                        connection.Start();
+                        DisplayClient(client.Client);
+                        Log.Debug($"Client connected - {client.Client.RemoteEndPoint.ToString()}");
+                    }
 
                 }
                 catch (SocketException socketEx)
@@ -92,7 +116,9 @@ namespace P2P_Project.Presentation_layer
         private void ConfigureKeepAlive(Socket socket)
         {
             socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
+
             int timeout = ConfigLoader.Instance.TimeoutTime / 1000;
+
             socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveTime, timeout);
             socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveInterval, timeout/2);
             socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveRetryCount, 3);
