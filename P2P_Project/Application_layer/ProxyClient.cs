@@ -10,7 +10,6 @@ namespace P2P_Project.Application_layer
     {
         private IPAddress _ipAddress;
         public int Port { private set; get; }
-        private ConfigLoader _configLoader;
 
         public ProxyClient(IPAddress ipAddress)
         {
@@ -30,34 +29,28 @@ namespace P2P_Project.Application_layer
         {
             List<int> portsToScan = new List<int>();
 
-            int minPort1 = ConfigLoader.Instance.ScanPortStart;
-            int maxPort1 = 8090;
-            for (int p = minPort1; p <= maxPort1; p++) portsToScan.Add(p);
-
-            int minPort2 = 65525;
-            int maxPort2 = ConfigLoader.Instance.ScanPortEnd;
-            for (int p = minPort2; p <= maxPort2; p++) portsToScan.Add(p);
-
-            List<Task<int>> tasks = new List<Task<int>>();
-            foreach (int port in portsToScan)
+            foreach (var range in ConfigLoader.Instance.ScanPortRanges)
             {
-                Task<int> task = CheckPortAsync(iPAddress, port);
-                tasks.Add(task);
+                for (int p = range.Start; p <= range.End; p++)
+                {
+                    portsToScan.Add(p);
+                }
             }
 
+            List<Task<int>> tasks = new List<Task<int>>();
+
+            foreach (int port in portsToScan)
+            {
+                tasks.Add(CheckPortAsync(iPAddress, port));
+            }
 
             while (tasks.Count > 0)
             {
                 var completedTask = await Task.WhenAny(tasks);
-
                 tasks.Remove(completedTask);
 
                 int foundPort = await completedTask;
-
-                if (foundPort != 0)
-                {
-                    return foundPort;
-                }
+                if (foundPort != 0) return foundPort;
             }
 
             return 0;
@@ -65,14 +58,13 @@ namespace P2P_Project.Application_layer
 
         private async Task<int> CheckPortAsync(IPAddress ip, int port)
         {
-            int timeoutMs = 2000;
-
             using (TcpClient client = new TcpClient())
             {
                 try
                 {
                     var connectTask = client.ConnectAsync(ip, port);
-                    var completedTask = await Task.WhenAny(connectTask, Task.Delay(timeoutMs));
+                    int timeout = ConfigLoader.Instance.TimeoutTime * 10000;
+                    var completedTask = await Task.WhenAny(connectTask, Task.Delay(timeout));
 
                     if (completedTask != connectTask)
                     {
@@ -90,13 +82,13 @@ namespace P2P_Project.Application_layer
                         await writer.WriteLineAsync("BC");
 
                         var readTask = reader.ReadLineAsync();
-                        var completedRead = await Task.WhenAny(readTask, Task.Delay(timeoutMs));
+                        var completedRead = await Task.WhenAny(readTask, Task.Delay(ConfigLoader.Instance.TimeoutTime * 1000));
 
                         if (completedRead != readTask) return 0;
 
                         string response = await readTask;
 
-                        if (CorrectAnswer(response))
+                        if (CorrectAnswer(response) == true)
                         {
                             return port;
                         }
@@ -116,7 +108,7 @@ namespace P2P_Project.Application_layer
 
             try
             {
-                if (parts[0] == "BC" && IPAddress.Parse(parts[1]) == _ipAddress)
+                if (parts[0] == "BC" && parts[1] == _ipAddress.ToString())
                 {
                     return true;
                 }

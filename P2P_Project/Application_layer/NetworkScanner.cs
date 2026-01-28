@@ -26,8 +26,6 @@ namespace P2P_Project.Application_layer
         public NetworkScanner()
         {
             var config = ConfigLoader.Instance;
-            _startIp = ConvertIpToNumber(config.ScanIpStart);
-            _endIp = ConvertIpToNumber(config.ScanIpEnd);
             _timeoutTime = config.TimeoutTime;
         }
 
@@ -42,10 +40,16 @@ namespace P2P_Project.Application_layer
 
             List<Task<string?>> scanTasks = new List<Task<string?>>();
 
-            for (long i = _startIp; i <= _endIp; i++)
+            foreach (var range in ConfigLoader.Instance.ScanIpRanges)
             {
-                string ip = ConvertNumberToIp(i);
-                scanTasks.Add(PingDeviceAsync(ip, _timeoutTime));
+                long start = ConvertIpToNumber(range.Start);
+                long end = ConvertIpToNumber(range.End);
+
+                for (long i = start; i <= end; i++)
+                {
+                    string ip = ConvertNumberToIp(i);
+                    scanTasks.Add(PingDeviceAsync(ip, _timeoutTime));
+                }
             }
 
             var results = await Task.WhenAll(scanTasks);
