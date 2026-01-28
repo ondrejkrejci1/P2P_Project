@@ -1,5 +1,23 @@
 # Changelog
 
+## 28.1.2025
+
+### Changed 
+
+- Change port and ip range configuration to load multiple ranges
+
+### Updated
+
+#### Yang
+
+- improved logging
+
+### Fixed
+
+- Missing error handling for configLoader
+- Error when setting a negative value in commands
+- NetworkScanner waiting infinitely for reply from non-existent hosts
+
 ## 27.1.2025
 
 ### Updated
