@@ -12,6 +12,17 @@
 
 - improved logging
 
+#### Krejčí
+
+- Redesigned the proxy client to scan ports asynchronously
+- Fixed problem in proxy client caused by connection timeout
+
+### Added
+
+#### Krejčí
+
+- Created logics for maximum number of connected users
+
 ### Fixed
 
 - Missing error handling for configLoader
@@ -26,6 +37,10 @@
 
 - Add logging to some functions
 
+#### Krejčí
+
+-  Updated UI
+
 ### Fixed
 
 #### Yang
@@ -39,6 +54,11 @@
 - Add network scanner
 - Bank robbery command
 
+#### Krejčí
+
+-  Created the logics for the proxy client
+-  Implemented proxy client into individual commands
+
 ## 26.1.2025
 
 ### Update
@@ -46,6 +66,13 @@
 #### Yang
 
 - Add more settings to configuration file
+  
+### Added
+
+#### Krejčí
+
+- Created logics for user disconectiong
+- Created visualization of connected users
 
 ## 24.1.2025
 
