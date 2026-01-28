@@ -1,4 +1,5 @@
 ﻿using P2P_Project.Data_access_layer;
+using Serilog;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -21,11 +22,11 @@ namespace P2P_Project.Application_layer
         {
             int port = 0;
 
-            int minPort = ConfigLoader.Instance.ScanPortStart;
-            int maxPort = 8090;
+            int startPort = ConfigLoader.Instance.ScanPortStart;
+            int endPort = ConfigLoader.Instance.ScanPortEnd;
 
 
-            for (int p = minPort; p <= maxPort; p++)
+            for (int p = startPort; p <= endPort; p++)
             {
                 try
                 {
@@ -62,10 +63,10 @@ namespace P2P_Project.Application_layer
                 return port;
             }
 
-            minPort = 65525;
-            maxPort = ConfigLoader.Instance.ScanPortEnd;
+            startPort = 65525;
+            endPort = ConfigLoader.Instance.ScanPortEnd;
 
-            for (int p = minPort; p <= maxPort; p++)
+            for (int p = startPort; p <= endPort; p++)
             {
                 try
                 {
@@ -129,6 +130,7 @@ namespace P2P_Project.Application_layer
         {
             if (Port == 0)
             {
+                Log.Error("ER Connection failure: No open port found for {IP}", _ipAddress);
                 return $"ER Unable to connect to {_ipAddress}. No open port found";
             }
 
@@ -136,6 +138,8 @@ namespace P2P_Project.Application_layer
 
             try
             {
+                Log.Information("Sending request to {IP}:{Port} | Content: {Request}", _ipAddress, Port, request);
+
                 TcpClient connection = new TcpClient();
                 connection.Connect(_ipAddress, Port);
 
@@ -149,16 +153,16 @@ namespace P2P_Project.Application_layer
                 }
 
                 connection.Close();
+
+                Log.Information("Received response from {IP}:{Port} | Content: {Response}", _ipAddress, Port, response);
             }
             catch (SocketException ex)
             {
                 response = $"ER Unable to connect to {_ipAddress}:{Port} - {ex.Message}";
+                Log.Error(ex, "ER Communication error with {IP}:{Port}", _ipAddress, Port);
             }
 
             return response;
         }
-
-
-
     }
 }
