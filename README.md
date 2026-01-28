@@ -103,5 +103,8 @@ All communication is text-based using **UTF-8** encoding.
 
 ## Resources
 Logger: https://gemini.google.com/share/e8b5e4283e8b
+
 Network scanner: https://gemini.google.com/share/8ffd2e52b7d0
+
 Robbery plan calculator: https://gemini.google.com/share/80308b14f362
+
