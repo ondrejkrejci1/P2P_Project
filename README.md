@@ -112,5 +112,7 @@ Robbery plan calculator: https://gemini.google.com/share/80308b14f362
 
 ### Reused logic from old projects
 
-
+Server: https://github.com/ondrejkrejci1/Parallelization-Project/blob/main/Server/Server/Server.cs
+Client handeling: https://github.com/ondrejkrejci1/Parallelization-Project/blob/main/Server/Server/ClientHandler.cs
+UI Structure: https://github.com/ondrejkrejci1/RDBMS-Project/blob/main/AthleticsManager/AthleticsManager/Views/MainWindow.xaml
 
