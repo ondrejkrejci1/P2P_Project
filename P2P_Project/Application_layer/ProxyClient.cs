@@ -1,5 +1,6 @@
 ﻿using P2P_Project.Data_access_layer;
 using Serilog;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -29,11 +30,13 @@ namespace P2P_Project.Application_layer
         {
             List<int> portsToScan = new List<int>();
 
-            foreach (var range in ConfigLoader.Instance.ScanPortRanges)
+            List<PortRange> portRanges = ConfigLoader.Instance.ScanPortRanges;
+
+            foreach (PortRange range in portRanges)
             {
-                for (int p = range.Start; p <= range.End; p++)
+                for (int port = range.Start; port <= range.End; port++)
                 {
-                    portsToScan.Add(p);
+                    portsToScan.Add(port);
                 }
             }
 
@@ -63,7 +66,7 @@ namespace P2P_Project.Application_layer
                 try
                 {
                     var connectTask = client.ConnectAsync(ip, port);
-                    int timeout = ConfigLoader.Instance.TimeoutTime * 10000;
+                    int timeout = ConfigLoader.Instance.TimeoutTime;
                     var completedTask = await Task.WhenAny(connectTask, Task.Delay(timeout));
 
                     if (completedTask != connectTask)
@@ -82,7 +85,7 @@ namespace P2P_Project.Application_layer
                         await writer.WriteLineAsync("BC");
 
                         var readTask = reader.ReadLineAsync();
-                        var completedRead = await Task.WhenAny(readTask, Task.Delay(ConfigLoader.Instance.TimeoutTime * 1000));
+                        var completedRead = await Task.WhenAny(readTask, Task.Delay(ConfigLoader.Instance.TimeoutTime));
 
                         if (completedRead != readTask) return 0;
 
