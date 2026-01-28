@@ -10,8 +10,15 @@ using System.Windows.Controls;
 
 namespace P2P_Project.Presentation_layer
 {
+    /// <summary>
+    /// Manages an individual TCP connection with a client.
+    /// Handles the communication lifecycle, command parsing/execution, and updates the server UI based on client actions.
+    /// </summary>
     public class TcpConnection
     {
+        /// <summary>
+        /// Gets the underlying <see cref="TcpClient"/> instance associated with this connection.
+        /// </summary>
         public TcpClient Client { private set; get; }
         private Thread _clientThread;
         private bool _isRunning;
@@ -28,6 +35,16 @@ namespace P2P_Project.Presentation_layer
         private CommandParser _commandParser;
         private CommandExecutor _commandExecutor;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TcpConnection"/> class.
+        /// Sets up command parsers, UI references, and prepares the communication thread.
+        /// </summary>
+        /// <param name="client">The connected TCP client instance.</param>
+        /// <param name="listener">The listener instance that created this connection (used for callbacks).</param>
+        /// <param name="clientPanel">UI panel for displaying client information.</param>
+        /// <param name="clientCounter">UI element displaying the count of active connections.</param>
+        /// <param name="numberOfClients">UI element displaying the total number of registered accounts.</param>
+        /// <param name="bankAmount">UI element displaying the total bank funds.</param>
         public TcpConnection(TcpClient client, ClientListener listener, StackPanel clientPanel, TextBlock clientCounter, TextBlock numberOfClients, TextBlock bankAmount)
         {
             _commandParser = new CommandParser();
@@ -48,12 +65,19 @@ namespace P2P_Project.Presentation_layer
             _clientThread = new Thread(Run);
         }
 
-
+        /// <summary>
+        /// Starts the dedicated background thread for handling client communication.
+        /// </summary>
         public void Start()
         {
             _clientThread.Start();
         }
 
+        /// <summary>
+        /// The main execution loop running on a background thread. It continuously processes incoming data 
+        /// by calling the Do() method until the connection is terminated or an error occurs. 
+        /// Ensures that the client is properly disconnected and removed from the listener's list when the loop ends.
+        /// </summary>
         private void Run()
         {
             Log.Debug("Connection thread started for client.");
@@ -77,6 +101,11 @@ namespace P2P_Project.Presentation_layer
             }
         }
 
+        /// <summary>
+        /// Performs a single iteration of the communication logic. It reads a line from the network stream, 
+        /// parses it into a command, executes the command using CommandExecutor, and triggers UI updates 
+        /// (refreshing client count or bank amount) if specific commands (AC, AR, AD, AW) are received.
+        /// </summary>
         private void Do()
         {
             try
@@ -118,6 +147,10 @@ namespace P2P_Project.Presentation_layer
             }
         }
 
+        /// <summary>
+        /// Safely terminates the connection by stopping the communication loop, closing the network readers/writers, 
+        /// closing the TCP client connection, and interrupting the background thread to release resources immediately.
+        /// </summary>
         public void Stop()
         {
             if (!_isRunning) return;
@@ -137,6 +170,10 @@ namespace P2P_Project.Presentation_layer
 
         }
 
+        /// <summary>
+        /// Reads the "accounts.json" file to determine the current number of registered clients and updates 
+        /// the corresponding UI element. This method uses the Dispatcher to ensure the UI update happens on the main thread.
+        /// </summary>
         private void LoadNumberOfClients()
         {
             Application.Current.Dispatcher.Invoke(() =>
@@ -164,6 +201,10 @@ namespace P2P_Project.Presentation_layer
             });
         }
 
+        /// <summary>
+        /// Calculates the total sum of funds across all accounts in "accounts.json" and updates the Bank Amount UI element. 
+        /// This method executes on the UI thread via Dispatcher and also calls FormatBankAmount to adjust the font size.
+        /// </summary>
         private void LoadBankAmount()
         {
             Application.Current.Dispatcher.Invoke(() =>
@@ -203,6 +244,10 @@ namespace P2P_Project.Presentation_layer
             });
         }
 
+        /// <summary>
+        /// Dynamically adjusts the font size of the Bank Amount text block based on the number of digits 
+        /// to ensure the text fits within the UI container without overflowing.
+        /// </summary>
         private void FormatBankAmount()
         {
             int pocetCifer = _bankAmount.Text.Length;
@@ -222,6 +267,10 @@ namespace P2P_Project.Presentation_layer
             }
         }
 
+        /// <summary>
+        /// Sends a predefined rejection message to the client indicating that the bank server has reached 
+        /// its maximum connection capacity and cannot accept new connections at this time.
+        /// </summary>
         public void SendMessageCapacityFull()
         {
             byte[] data = Encoding.UTF8.GetBytes("The maximum number of clients allowed by the bank is connected to the bank. Please try connecting later." + Environment.NewLine);

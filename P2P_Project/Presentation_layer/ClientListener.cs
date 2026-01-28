@@ -7,6 +7,10 @@ using System.Windows.Controls;
 
 namespace P2P_Project.Presentation_layer
 {
+    /// <summary>
+    /// Handles listening for incoming TCP client connections and managing their lifecycle on the server.
+    /// Manages the acceptance thread, tracks active connections, and updates the server UI with client status.
+    /// </summary>
     public class ClientListener
     {
         private TcpListener _listener;
@@ -25,6 +29,17 @@ namespace P2P_Project.Presentation_layer
         private TextBlock _numberOfClients;
         private TextBlock _bankAmount;
 
+        /// <summary>
+        /// Initializes a new instance of the ClientListener class.
+        /// Sets up the TCP listener on the specified IP and port and prepares UI references for real-time updates.
+        /// </summary>
+        /// <param name="ipAddress">The IP address to bind the listener to.</param>
+        /// <param name="port">The port number to listen on.</param>
+        /// <param name="_timeoutTime">The keep-alive timeout setting for client connections.</param>
+        /// <param name="clientPanel">The UI panel where connected client details will be listed.</param>
+        /// <param name="clientCounter">The UI text block displaying the current count of active connections.</param>
+        /// <param name="numberOfClients">The UI text block displaying total registered clients (from DB/File).</param>
+        /// <param name="bankAmount">The UI text block displaying the total bank funds.</param>
         public ClientListener(string ipAddress, int port, int _timeoutTime, StackPanel clientPanel, TextBlock clientCounter, TextBlock numberOfClients, TextBlock bankAmount)
         {
             _listener = new TcpListener(IPAddress.Parse(ipAddress), port);
@@ -40,6 +55,10 @@ namespace P2P_Project.Presentation_layer
             _clientAcceptor = new Thread(AcceptClient);
         }
 
+        /// <summary>
+        /// Starts the TCP listener and the background thread responsible for accepting incoming client connections.
+        /// Logs the server start status.
+        /// </summary>
         public void Start()
         {
             try
@@ -58,6 +77,11 @@ namespace P2P_Project.Presentation_layer
 
         private readonly object _listLock = new object();
 
+        /// <summary>
+        /// The main loop for accepting new clients. Runs on a dedicated background thread.
+        /// It waits for a connection, configures keep-alive settings, and creates a new TcpConnection instance.
+        /// If the maximum connection count is exceeded, it rejects the client with a message; otherwise, it adds the client to the active list.
+        /// </summary>
         private void AcceptClient()
         {
             while (_isRunning)
@@ -113,6 +137,10 @@ namespace P2P_Project.Presentation_layer
             }
         }
 
+        /// <summary>
+        /// Configures low-level TCP Keep-Alive options on the client socket to detect dead connections.
+        /// </summary>
+        /// <param name="socket">The socket to configure.</param>
         private void ConfigureKeepAlive(Socket socket)
         {
             socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
@@ -124,6 +152,11 @@ namespace P2P_Project.Presentation_layer
             socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveRetryCount, 3);
         }
 
+        /// <summary>
+        /// Updates the UI to display the newly connected client. 
+        /// Adds a text entry to the client panel and increments the displayed connection counter.
+        /// </summary>
+        /// <param name="socket">The socket of the connected client used for identification.</param>
         private void DisplayClient(Socket socket)
         {
             Application.Current.Dispatcher.Invoke(() =>
@@ -146,6 +179,9 @@ namespace P2P_Project.Presentation_layer
             });
         }
 
+        /// <summary>
+        /// Stops the listener, terminates the acceptor thread, and disconnects all currently active clients.
+        /// </summary>
         public void Stop()
         {
             _isRunning = false;
@@ -160,6 +196,11 @@ namespace P2P_Project.Presentation_layer
             }
         }
 
+        /// <summary>
+        /// Handles the logic when a client disconnects. 
+        /// Removes the client from the active list and updates the UI (removes the client entry and decrements the counter).
+        /// </summary>
+        /// <param name="client">The TcpConnection instance that has disconnected.</param>
         public void ClientDisconected(TcpConnection client)
         {
             try

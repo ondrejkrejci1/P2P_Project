@@ -13,13 +13,18 @@ using System.Windows.Input;
 namespace P2P_Project
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// Interaction logic for MainWindow.xaml.
+    /// Represents the main entry point of the banking server application, handling UI updates, 
+    /// logging configuration, and the lifecycle of the client listener.
     /// </summary>
     public partial class MainWindow : Window
     {
         private ClientListener _clientListener;
         private ConfigLoader _configLoader;
 
+        /// <summary>
+        /// Configures the Serilog logger to output logs to both the UI panel and a text file.
+        /// </summary>
         private void CreateLogger()
         {
             Log.Logger = new LoggerConfiguration()
@@ -45,6 +50,9 @@ namespace P2P_Project
             .CreateLogger();
         }
 
+        /// <summary>
+        /// Initializes the main window, validates configuration, starts the client listener, and loads initial data.
+        /// </summary>
         public MainWindow()
         {
 
@@ -72,6 +80,10 @@ namespace P2P_Project
        
         }
 
+        /// <summary>
+        /// Stops the client listener when the window is closing.
+        /// </summary>
+        /// <param name="e">Event data for the closing event.</param>
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
         {
             if (_clientListener != null)
@@ -82,7 +94,9 @@ namespace P2P_Project
             base.OnClosing(e);
         }
 
-
+        /// <summary>
+        /// Loads the total number of clients from the JSON storage and updates the UI.
+        /// </summary>
         private void LoadNumberOfClients()
         {
             try
@@ -107,6 +121,9 @@ namespace P2P_Project
             }
         }
 
+        /// <summary>
+        /// Calculates the total funds from all accounts in storage and updates the UI.
+        /// </summary>
         private void LoadBankAmount()
         {
             decimal totalSum = 0;
@@ -143,6 +160,9 @@ namespace P2P_Project
             FormatBankAmount();
         }
 
+        /// <summary>
+        /// Adjusts the font size of the bank amount text based on the number of digits.
+        /// </summary>
         private void FormatBankAmount()
         {
             int pocetCifer = BankAmount.Text.Length;
@@ -162,31 +182,61 @@ namespace P2P_Project
             }
         }
 
+        /// <summary>
+        /// Shows the hover effect for active clients.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">Mouse event arguments.</param>
         private void ShowActiveClients(object sender, MouseEventArgs e)
         {
             ActiveClientsHover.Visibility = Visibility.Visible;
         }
 
+        /// <summary>
+        /// Hides the hover effect for active clients.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">Mouse event arguments.</param>
         private void HideActiveClients(object sender, MouseEventArgs e)
         {
             ActiveClientsHover.Visibility = Visibility.Hidden;
         }
 
+        /// <summary>
+        /// Shows the hover effect for number of clients.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">Mouse event arguments.</param>
         private void ShowNumberOfClients(object sender, MouseEventArgs e)
         {
             NumberOfClientsHover.Visibility = Visibility.Visible;
         }
 
+        /// <summary>
+        /// Hides the hover effect for number of clients.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">Mouse event arguments.</param>
         private void HideNumberOfClients(object sender, MouseEventArgs e)
         {
             NumberOfClientsHover.Visibility = Visibility.Hidden;
         }
 
+        /// <summary>
+        /// Shows the hover effect for bank amount.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">Mouse event arguments.</param>
         private void ShowBankAmount(object sender, MouseEventArgs e)
         {
             BankAmountHover.Visibility = Visibility.Visible;
         }
 
+        /// <summary>
+        /// Hides the hover effect for bank amount.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">Mouse event arguments.</param>
         private void HideBankAmount(object sender, MouseEventArgs e)
         {
             BankAmountHover.Visibility = Visibility.Hidden;
