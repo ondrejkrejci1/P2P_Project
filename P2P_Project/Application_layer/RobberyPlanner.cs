@@ -44,8 +44,8 @@ namespace P2P_Project.Application_layer
 
             if (availableBankNodes.Length == 0)
             {
-                Log.Warning("Robbery plan aborted: No other bank nodes were found on the network.");
-                return "ER no other bank nodes were found";
+                Log.Warning("RP Failed: No bank nodes found");
+                return "RP Failed: No bank nodes found";
             }
 
             string result = CalculateOptimalKnapsackPlan(availableBankNodes, targetMoneyAmount);
