@@ -1,4 +1,5 @@
-﻿using Serilog;
+﻿using P2P_Project.Data_access_layer;
+using Serilog;
 using System.Net;
 using System.Net.Sockets;
 using System.Windows;
@@ -91,8 +92,9 @@ namespace P2P_Project.Presentation_layer
         private void ConfigureKeepAlive(Socket socket)
         {
             socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
-            socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveTime, 20);
-            socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveInterval, 2);
+            int timeout = ConfigLoader.Instance.TimeoutTime / 1000;
+            socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveTime, timeout);
+            socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveInterval, timeout/2);
             socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveRetryCount, 3);
         }
 
