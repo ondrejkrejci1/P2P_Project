@@ -65,14 +65,13 @@ namespace P2P_Project.Application_layer
 
         private async Task<int> CheckPortAsync(IPAddress ip, int port)
         {
-            int timeoutMs = 2000;
-
             using (TcpClient client = new TcpClient())
             {
                 try
                 {
                     var connectTask = client.ConnectAsync(ip, port);
-                    var completedTask = await Task.WhenAny(connectTask, Task.Delay(timeoutMs));
+                    int timeout = ConfigLoader.Instance.TimeoutTime * 10000;
+                    var completedTask = await Task.WhenAny(connectTask, Task.Delay(timeout));
 
                     if (completedTask != connectTask)
                     {
@@ -90,13 +89,13 @@ namespace P2P_Project.Application_layer
                         await writer.WriteLineAsync("BC");
 
                         var readTask = reader.ReadLineAsync();
-                        var completedRead = await Task.WhenAny(readTask, Task.Delay(timeoutMs));
+                        var completedRead = await Task.WhenAny(readTask, Task.Delay(ConfigLoader.Instance.TimeoutTime * 1000));
 
                         if (completedRead != readTask) return 0;
 
                         string response = await readTask;
 
-                        if (CorrectAnswer(response))
+                        if (CorrectAnswer(response) == true)
                         {
                             return port;
                         }
@@ -116,7 +115,7 @@ namespace P2P_Project.Application_layer
 
             try
             {
-                if (parts[0] == "BC" && IPAddress.Parse(parts[1]) == _ipAddress)
+                if (parts[0] == "BC" && parts[1] == _ipAddress.ToString())
                 {
                     return true;
                 }
