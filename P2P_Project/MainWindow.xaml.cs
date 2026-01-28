@@ -53,9 +53,22 @@ namespace P2P_Project
 
         public MainWindow()
         {
-            CreateLogger();
 
             InitializeComponent();
+
+            CreateLogger();
+
+            if (!ConfigLoader.Instance.IsLoaded)
+            {
+                MessageBox.Show(
+                    $"Critical Configuration Error:\n\n{ConfigLoader.Instance.LoadError}",
+                    "Startup Failed",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Stop);
+
+                Application.Current.Shutdown();
+                return;
+            }
 
             _clientListener = new ClientListener(ConfigLoader.Instance.IPAddress, ConfigLoader.Instance.AppPort, ConfigLoader.Instance.TimeoutTime, ClientPanel, ActiveClients, NumberOfClients, BankAmount);
             _clientListener.Start();
