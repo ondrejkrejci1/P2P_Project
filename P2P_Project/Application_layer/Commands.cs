@@ -276,7 +276,7 @@ namespace P2P_Project.Application_layer
             /// </summary>
             public async void Execute(TcpClient client, string[] args)
             {
-                if (args.Length < 2 || !long.TryParse(args[1], out long targetAmount))
+                if (args.Length < 2 || !long.TryParse(args[1], out long targetAmount) || targetAmount <= 0)
                 {
                     Log.Warning("RP Command rejected: Invalid target amount.");
                     ConnectionManager.Instance.SendMessage(client, "ER RP Failed: Invalid target amount");
