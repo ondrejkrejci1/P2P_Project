@@ -47,7 +47,6 @@ namespace P2P_Project.Data_access_layer
         {
             lock (_lock)
             {
-                Log.Information("Requesting new account creation.");
                 int newAccountNumber;
 
                 do
@@ -59,7 +58,7 @@ namespace P2P_Project.Data_access_layer
                 var account = new BankAccount(newAccountNumber, 0);
                 _accounts.Add(account);
 
-                Log.Debug("Account {Acc} added to memory list.", newAccountNumber);
+                Log.Debug("Added account {Acc}.", newAccountNumber);
                 SaveAccounts();
 
                 return newAccountNumber;
@@ -136,11 +135,10 @@ namespace P2P_Project.Data_access_layer
                 {
                     string json = JsonSerializer.Serialize(_accounts, new JsonSerializerOptions { WriteIndented = true });
                     File.WriteAllText(FilePath, json);
-                    Log.Debug("Repo: Successfully saved {Count} accounts to disk", _accounts.Count);
                 }
                 catch (Exception ex)
                 {
-                    Log.Error(ex, "Repo: Failed to save accounts to {Path}", FilePath);
+                    Log.Error(ex, "Failed to save accounts to {Path}", FilePath);
                     throw new Exception($"Failed to save accounts: {ex.Message}");
                 }
             }
@@ -155,7 +153,6 @@ namespace P2P_Project.Data_access_layer
         {
             lock (_lock)
             {
-                Log.Debug("Creating thread-safe snapshot of all accounts.");
                 return _accounts.ToList();
             }
         }
