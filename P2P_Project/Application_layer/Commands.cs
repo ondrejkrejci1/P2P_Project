@@ -86,7 +86,7 @@ namespace P2P_Project.Application_layer
             {
                 if (args.Length < 3 ||
                     !TryParseAccountArg(args[1], out int accountNumber, out string ip) ||
-                    !long.TryParse(args[2], out long amount))
+                    !long.TryParse(args[2], out long amount) || amount <= 0)
                 {
                     Log.Warning("AD Command rejected: Invalid arguments.");
                     ConnectionManager.Instance.SendMessage(client, "ER AD Failed: Invalid arguments");
@@ -126,7 +126,7 @@ namespace P2P_Project.Application_layer
             {
                 if (args.Length < 3 ||
                     !TryParseAccountArg(args[1], out int accountNumber, out string ip) ||
-                    !long.TryParse(args[2], out long amount))
+                    !long.TryParse(args[2], out long amount) || amount <= 0)
                 {
                     Log.Warning("AW Command rejected: Invalid arguments.");
                     ConnectionManager.Instance.SendMessage(client, "ER AW Failed: Invalid arguments");
@@ -276,7 +276,7 @@ namespace P2P_Project.Application_layer
             /// </summary>
             public async void Execute(TcpClient client, string[] args)
             {
-                if (args.Length < 2 || !long.TryParse(args[1], out long targetAmount))
+                if (args.Length < 2 || !long.TryParse(args[1], out long targetAmount) || targetAmount <= 0)
                 {
                     Log.Warning("RP Command rejected: Invalid target amount.");
                     ConnectionManager.Instance.SendMessage(client, "ER RP Failed: Invalid target amount");

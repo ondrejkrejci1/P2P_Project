@@ -26,7 +26,7 @@ namespace P2P_Project.Application_layer
         public NetworkScanner()
         {
             var config = ConfigLoader.Instance;
-            _timeoutTime = config.TimeoutTime;
+            _timeoutTime = 100;
         }
 
         /// <summary>
@@ -73,13 +73,18 @@ namespace P2P_Project.Application_layer
         {
             try
             {
+                Log.Debug($"Pinging {ip}");
                 using Ping pingSender = new Ping();
                 PingReply reply = await pingSender.SendPingAsync(ip, timeout);
 
                 if (reply.Status == IPStatus.Success)
                 {
-                    Log.Information($"Device found at {ip}: Ping successful.");
+                    Log.Debug($"Device found at {ip}: Ping successful.");
                     return ip;
+                }
+                else
+                {
+                    Log.Debug($"Ping to {ip} failed: {reply.Status}");
                 }
 
             }

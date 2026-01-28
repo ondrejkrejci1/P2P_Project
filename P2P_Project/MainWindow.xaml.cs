@@ -38,12 +38,6 @@ namespace P2P_Project
                 }).Subscribe())
 
             .WriteTo.File(
-                path: "logs/status.txt",
-                restrictedToMinimumLevel: LogEventLevel.Information,
-                rollingInterval: RollingInterval.Day,
-                flushToDiskInterval: TimeSpan.FromSeconds(1))
-
-            .WriteTo.File(
                 path: "logs/errors.txt",
                 restrictedToMinimumLevel: LogEventLevel.Error,
                 rollingInterval: RollingInterval.Day,
