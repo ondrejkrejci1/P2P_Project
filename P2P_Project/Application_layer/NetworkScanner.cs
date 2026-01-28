@@ -78,12 +78,8 @@ namespace P2P_Project.Application_layer
                     return ip;
                 }
 
-                Log.Debug($"IP {ip} rejected: {reply.Status}");
             }
-            catch (Exception ex)
-            {
-                Log.Debug($"IP {ip} rejected: {ex.Message}");
-            }
+            catch {}
 
             return null;
         }
