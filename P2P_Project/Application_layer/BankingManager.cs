@@ -123,8 +123,6 @@ namespace P2P_Project.Application_layer
             try
             {
                 var account = _repository.GetBankAccount(accountNumber);
-                // Note: GetBankAccount throws KeyNotFoundException if null, 
-                // but we keep the null check pattern for safety.
                 if (account == null) return "ER AB Failed: Account not found";
 
                 return $"AB {account.Balance}";
