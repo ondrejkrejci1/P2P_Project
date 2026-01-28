@@ -82,7 +82,7 @@ namespace P2P_Project.Application_layer
             /// <summary>
             /// Validates arguments and executes a deposit locally or forwards it via proxy.
             /// </summary>
-            public void Execute(TcpClient client, string[] args)
+            public async void Execute(TcpClient client, string[] args)
             {
                 if (args.Length < 3 ||
                     !TryParseAccountArg(args[1], out int accountNumber, out string ip) ||
@@ -103,7 +103,7 @@ namespace P2P_Project.Application_layer
                 else
                 {
                     Log.Information("Forwarding deposit for Account {Acc} to remote node {IP}.", accountNumber, ip);
-                    ProxyClient proxyClient = new ProxyClient(IPAddress.Parse(ip));
+                    ProxyClient proxyClient = await ProxyClient.CreateClient(IPAddress.Parse(ip));
                     string request = string.Join(' ', args);
                     result = proxyClient.ForwardRequest(request);
                 }
@@ -122,7 +122,7 @@ namespace P2P_Project.Application_layer
             /// <summary>
             /// Validates arguments and executes a withdrawal locally or forwards it via proxy.
             /// </summary>
-            public void Execute(TcpClient client, string[] args)
+            public async void Execute(TcpClient client, string[] args)
             {
                 if (args.Length < 3 ||
                     !TryParseAccountArg(args[1], out int accountNumber, out string ip) ||
@@ -143,7 +143,7 @@ namespace P2P_Project.Application_layer
                 else
                 {
                     Log.Information("Forwarding withdrawal for Account {Acc} to remote node {IP}.", accountNumber, ip);
-                    ProxyClient proxyClient = new ProxyClient(IPAddress.Parse(ip));
+                    ProxyClient proxyClient = await ProxyClient.CreateClient(IPAddress.Parse(ip));
                     string request = string.Join(' ', args);
                     result = proxyClient.ForwardRequest(request);
                 }
@@ -162,7 +162,7 @@ namespace P2P_Project.Application_layer
             /// <summary>
             /// Validates arguments and retrieves the balance locally or via proxy.
             /// </summary>
-            public void Execute(TcpClient client, string[] args)
+            public async void Execute(TcpClient client, string[] args)
             {
                 if (args.Length < 2 ||
                     !TryParseAccountArg(args[1], out int accountNumber, out string ip))
@@ -182,7 +182,7 @@ namespace P2P_Project.Application_layer
                 else
                 {
                     Log.Information("Forwarding balance check for Account {Acc} to {IP}.", accountNumber, ip);
-                    ProxyClient proxyClient = new ProxyClient(IPAddress.Parse(ip));
+                    ProxyClient proxyClient = await ProxyClient.CreateClient(IPAddress.Parse(ip));
                     string request = string.Join(' ', args);
                     result = proxyClient.ForwardRequest(request);
                 }
@@ -201,7 +201,7 @@ namespace P2P_Project.Application_layer
             /// <summary>
             /// Validates arguments and removes the account locally or requests removal via proxy.
             /// </summary>
-            public void Execute(TcpClient client, string[] args)
+            public async void Execute(TcpClient client, string[] args)
             {
                 if (args.Length < 2 ||
                     !TryParseAccountArg(args[1], out int accountNumber, out string ip))
@@ -221,7 +221,7 @@ namespace P2P_Project.Application_layer
                 else
                 {
                     Log.Information("Forwarding removal request for Account {Acc} to {IP}.", accountNumber, ip);
-                    ProxyClient proxyClient = new ProxyClient(IPAddress.Parse(ip));
+                    ProxyClient proxyClient = await ProxyClient.CreateClient(IPAddress.Parse(ip));
                     string request = string.Join(' ', args);
                     result = proxyClient.ForwardRequest(request);
                 }

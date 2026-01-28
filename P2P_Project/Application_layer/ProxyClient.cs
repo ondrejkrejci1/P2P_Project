@@ -15,93 +15,100 @@ namespace P2P_Project.Application_layer
         public ProxyClient(IPAddress ipAddress)
         {
             _ipAddress = ipAddress;
-            Port = FindPort(_ipAddress);
         }
 
-        private int FindPort(IPAddress iPAddress)
+        public static async Task<ProxyClient> CreateClient(IPAddress ipAddress)
         {
-            int port = 0;
+            ProxyClient client = new ProxyClient(ipAddress);
 
-            int startPort = ConfigLoader.Instance.ScanPortStart;
-            int endPort = ConfigLoader.Instance.ScanPortEnd;
+            client.Port = await client.FindPort(ipAddress);
 
-
-            for (int p = startPort; p <= endPort; p++)
-            {
-                try
-                {
-                    TcpClient connection = new TcpClient();
-                    connection.Connect(iPAddress, p);
-
-                    using (NetworkStream stream = connection.GetStream())
-                    {
-                        StreamReader reader = new StreamReader(stream);
-                        StreamWriter writer = new StreamWriter(stream) { AutoFlush = true };
-
-                        writer.WriteLine("BC");
-                        string response = reader.ReadLine();
-
-                        if (CorrectAnswer(response) == true)
-                        {
-                            connection.Close();
-                        }
-
-                    }
-
-                    port = p;
-                    break;
-
-                }
-                catch (SocketException)
-                {
-                    continue;
-                }
-            }
-
-            if (port != 0)
-            {
-                return port;
-            }
-
-            startPort = 65525;
-            endPort = ConfigLoader.Instance.ScanPortEnd;
-
-            for (int p = startPort; p <= endPort; p++)
-            {
-                try
-                {
-                    TcpClient connection = new TcpClient();
-                    connection.Connect(iPAddress, p);
-
-                    using (NetworkStream stream = connection.GetStream())
-                    {
-                        StreamReader reader = new StreamReader(stream);
-                        StreamWriter writer = new StreamWriter(stream) { AutoFlush = true };
-
-                        writer.WriteLine("BC");
-                        string response = reader.ReadLine();
-
-                        if (!CorrectAnswer(response))
-                        {
-                            connection.Close();
-                        }
-
-                    }
-                    connection.Close();
-
-                    port = p;
-                    break;
-
-                }
-                catch (SocketException)
-                {
-                    continue;
-                }
-            }
-
-            return port;
+            return client;
         }
 
+        private async Task<int> FindPort(IPAddress iPAddress)
+        {
+            List<int> portsToScan = new List<int>();
+
+            int minPort1 = ConfigLoader.Instance.ScanPortStart;
+            int maxPort1 = 8090;
+            for (int p = minPort1; p <= maxPort1; p++) portsToScan.Add(p);
+
+            int minPort2 = 65525;
+            int maxPort2 = ConfigLoader.Instance.ScanPortEnd;
+            for (int p = minPort2; p <= maxPort2; p++) portsToScan.Add(p);
+
+            List<Task<int>> tasks = new List<Task<int>>();
+            foreach (int port in portsToScan)
+            {
+                Task<int> task = CheckPortAsync(iPAddress, port);
+                tasks.Add(task);
+            }
+
+
+            while (tasks.Count > 0)
+            {
+                var completedTask = await Task.WhenAny(tasks);
+
+                tasks.Remove(completedTask);
+
+                int foundPort = await completedTask;
+
+                if (foundPort != 0)
+                {
+                    return foundPort;
+                }
+            }
+
+            return 0;
+        }
+
+        private async Task<int> CheckPortAsync(IPAddress ip, int port)
+        {
+            int timeoutMs = 2000;
+
+            using (TcpClient client = new TcpClient())
+            {
+                try
+                {
+                    var connectTask = client.ConnectAsync(ip, port);
+                    var completedTask = await Task.WhenAny(connectTask, Task.Delay(timeoutMs));
+
+                    if (completedTask != connectTask)
+                    {
+                        return 0;
+                    }
+
+                    await connectTask;
+
+                    if (!client.Connected) return 0;
+
+                    using (NetworkStream stream = client.GetStream())
+                    using (StreamWriter writer = new StreamWriter(stream) { AutoFlush = true })
+                    using (StreamReader reader = new StreamReader(stream))
+                    {
+                        await writer.WriteLineAsync("BC");
+
+                        var readTask = reader.ReadLineAsync();
+                        var completedRead = await Task.WhenAny(readTask, Task.Delay(timeoutMs));
+
+                        if (completedRead != readTask) return 0;
+
+                        string response = await readTask;
+
+                        if (CorrectAnswer(response))
+                        {
+                            return port;
+                        }
+                    }
+                }
+                catch (Exception)
+                {
+                    return 0;
+                }
+            }
+            return 0;
+        }
 
         private bool CorrectAnswer(string response)
         {
