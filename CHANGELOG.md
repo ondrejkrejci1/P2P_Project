@@ -22,6 +22,7 @@
 #### Krejčí
 
 - Created logics for maximum number of connected users
+- created documentation for the classes I edited
 
 ### Fixed
 
