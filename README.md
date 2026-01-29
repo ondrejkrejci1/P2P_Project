@@ -54,8 +54,9 @@ The application uses `config/config.json` to manage node identity and network di
 ```json
 {
   "IPAddress": "127.0.0.1",
-  "Port": 65525,
-  "TimeoutTime": 200,
+  "AppPort": 65525,
+  "TimeoutTime": 2000,
+  "MaxConnectionCount": 100,
   "ScanIpRanges": [
     {
       "Start": "10.0.0.1",
