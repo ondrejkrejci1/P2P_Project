@@ -22,7 +22,7 @@ This project implements a decentralized Peer-to-Peer (P2P) banking node. Each no
 4. After extraction, go to the directory where the file with the .sln extension is located.
 5. Open the command prompt.
 6. Use the cd command to navigate to the directory containing the .sln file that you found earlier.
-7. Type the command: !dotnet build!.
+7. Type the command: `dotnet build`.
 8. After completing the build, go to the file manager and navigate from the folder containing the .sln file to the P2P_Project -> bin -> Debug -> net8.0-windows folder.
 9. Create a new folder named config.
 10. Open the newly created folder.
