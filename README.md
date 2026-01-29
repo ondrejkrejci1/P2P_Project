@@ -19,7 +19,7 @@ This project implements a decentralized Peer-to-Peer (P2P) banking node. Each no
 1. Click green button Code.
 2. Click Download ZIP.
 3. Find the location where the .zip folder was saved and extract it.
-4. Find the directory where the file with the .sln extension is located.
+4. After extraction, go to the directory where the file with the .sln extension is located.
 5. Open the command prompt.
 6. Use the cd command to navigate to the directory containing the .sln file that you found earlier.
 7. Type the command: !dotnet build!.
