@@ -27,7 +27,7 @@ This project implements a decentralized Peer-to-Peer (P2P) banking node. Each no
 9. Create a new folder named config.
 10. Open the newly created folder.
 11. Create a new json file named config.json or download config.json file from github and copy it here.
-12. Edit the newly created file and insert the structure shown as !config.json structure!.
+12. Edit the newly created file and insert the structure shown as `Example Configuration` down below.
 13. Set the parameters according to your needs and save the changes.
 14. Find the .exe file in the folder named net8.0-windows, where you created the config folder, and run the file
 
